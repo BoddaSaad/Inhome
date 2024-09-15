@@ -22,7 +22,7 @@ class SingViewSet(APIView):
             return Response({"message": "User created successfully", "user_id": user.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+##
 class Brovicevieset(APIView):
     def post(self,request):
         try:
