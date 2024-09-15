@@ -11,10 +11,11 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-tl963evrvnh^zpqivx1v(sw4a@f*w)6tr7bm+2b$4hia+8_74x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -40,9 +41,9 @@ INSTALLED_APPS = [
     'user_data',
     'rest_framework',
     'rest_framework_simplejwt',
-       'rest_framework_simplejwt.token_blacklist',
-       'drf_yasg',
-     'social_django',
+    'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +57,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'project.urls'
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
@@ -127,7 +130,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 AUTH_USER_MODEL = 'user_data.Cuser'
 
 from datetime import timedelta # import this library top of the settings.py file
@@ -183,7 +187,13 @@ CACHES = {
     }
 }
 
-
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+}
 
 
 # settings.py
@@ -195,3 +205,4 @@ PAYMOB_AUTH_URL = 'https://accept.paymobsolutions.com/api/auth/tokens'
 PAYMOB_ORDER_URL = 'https://accept.paymobsolutions.com/api/ecommerce/orders'
 PAYMOB_PAYMENT_KEY_URL = 'https://accept.paymobsolutions.com/api/acceptance/payment_keys'
 PAYMOB_IFRAME_URL = 'https://accept.paymobsolutions.com/api/acceptance/iframes/'
+
