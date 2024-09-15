@@ -116,24 +116,26 @@ class Order_serviceserlizer(serializers.ModelSerializer):
 
 
 
-class CuserSerializer(serializers.ModelSerializer):
+class CombinedCuserSerializer(serializers.ModelSerializer):
+    #new_phone = serializers.CharField(max_length=50, required=False)
+
     class Meta:
         model = Cuser
-        fields = [  'country', 'lan',  ]
+        fields = ['country', 'lan', 'phone','location']
+        
 
+    #def validate(self, attrs):
+        #user = self.context.get('request').user  # الحصول على المستخدم الحالي من السياق
+        #phone = attrs.get('phone')
+        #new_phone = attrs.get('new_phone')
 
-class CuserSerializer_2(serializers.ModelSerializer):
-    class Meta:
-        model = Cuser
-        fields = ['name','phone','new_phone', 'location']
+        #if phone and new_phone and phone == new_phone:
+         #   raise serializers.ValidationError({"error": "Phone and new phone cannot be the same."})
 
-    def validate(self, attrs):
-        phone=attrs['phone']
-        new_phone=attrs['new_phone']
-        if phone == new_phone:
-            raise serializers.ValidationError({"eroor":"same number "})
+        #if new_phone and user.phone != new_phone:
+           # raise serializers.ValidationError({"error": "New phone number does not match the current phone number in the database."})
 
-
+        #return attrs
 
 
 class ServiceProviderOfferSerializer(serializers.ModelSerializer):
@@ -142,15 +144,24 @@ class ServiceProviderOfferSerializer(serializers.ModelSerializer):
         fields = ['order', 'provider', 'price', 'comment', 'created_at']
         read_only_fields = ['created_at']
 
+class ServiceProviderOfferSerializer_put(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceProviderOffer
+        fields = ['order', 'provider', 'price', 'time_arrive', 'created_at']
+        read_only_fields = ['created_at']
 
 
 class OfferPriceSerializer(serializers.ModelSerializer):
     provider_name = serializers.SerializerMethodField()
     provider_pic = serializers.SerializerMethodField()
+    service_name = serializers.SerializerMethodField()
+    email=serializers.SerializerMethodField()
+    phone=serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceProviderOffer
-        fields = '__all__'
+        fields = fields = ['id', 'provider_name', 'provider_pic', 'time_arrive', 'price', 'comment', 'created_at', 'status', 'order', 'provider', 'service_name','email','phone']
+          
 
     def get_provider_name(self, obj):
         try:
@@ -168,14 +179,15 @@ class OfferPriceSerializer(serializers.ModelSerializer):
         except Brovides_services.DoesNotExist:
             return None
         
-    def get_name_service(self,obj):
+    def get_service_name(self, obj):
         try:
             brovide_service = Brovides_services.objects.get(user=obj.provider)
-            return brovide_service.service
+            return brovide_service.service.name
         except Brovides_services.DoesNotExist:
             return None
+
         
-    def get_phone_number(self,obj):
+    def get_phone(self,obj):
         try:
             brovide_service = Brovides_services.objects.get(user=obj.provider)
             return brovide_service.user.phone
@@ -190,7 +202,12 @@ class OfferPriceSerializer(serializers.ModelSerializer):
             return None
         
     def get_average_rating(self, obj):
-        return obj.rating
+        try:
+            brovide_service = Brovides_services.objects.get(user=obj.provider)
+            print(brovide_service.rating)
+            return brovide_service.rating
+        except Brovides_services.DoesNotExist:
+            return None
 
         
 
@@ -230,6 +247,105 @@ class GET_orders(serializers.ModelSerializer):
             "time": order.time,
             "location": order.location,
             "file": order.file.url,
-            
             "count": order.count
         }
+
+
+
+
+class ServiceProviderOfferUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceProviderOffer
+        fields = ['price', 'status']
+        read_only_fields = ['status']
+
+    def update(self, instance, validated_data):
+        instance.price = validated_data.get('price', instance.price)
+        instance.status = 'P'  # تغيير الحالة إلى "Pending"
+        instance.save()
+        return instance
+    
+    
+    
+class OfferUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceProviderOffer
+        fields = ['price', 'status', 'comment']  # الحقول التي يمكن تحديثها
+
+
+
+class Noticationserlizer(serializers.ModelSerializer):
+    class Meta:
+        models=Notfications_Broviders
+        fields="__all__"
+        
+        
+        
+class NotificationSerializer_clent(serializers.ModelSerializer):
+    class Meta:
+        model = notfications_client
+        fields = '__all__'
+        
+        
+class CompleatService(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+    service = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServiceProviderOffer  # Corrected from 'models'
+        fields = '__all__'
+
+    def get_name(self, obj):
+        client = obj.order.user.first_name
+        return client
+
+    def get_location(self, obj):
+        location = obj.order.user.location  # Fixed typo: 'loction' to 'location'
+        return location
+
+    def get_price(self, obj):
+        price = obj.price
+        return price
+
+    def get_service(self, obj):
+        service = obj.order.service.name  # Fixed typo
+        return service
+
+    def get_created_at(self, obj):
+        return obj.created_at
+    
+
+class CompleatService_client(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+    service = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
+    pic = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServiceProviderOffer
+        fields = ['name', 'price', 'service', 'created_at', 'pic']  # تحديد الحقول التي تحتاجها فقط
+
+    def get_name(self, obj):
+        # إرجاع اسم مزود الخدمة بدلاً من الكائن نفسه
+        return obj.provider.username  # أو أي حقل تراه مناسباً لاسم مزود الخدمة
+
+    def get_pic(self, obj):
+        try:
+            # احصل على نموذج Brovides_services بناءً على مزود الخدمة
+            brovides_services = Brovides_services.objects.get(user=obj.provider)
+            return brovides_services.personlity_pic.url  # إرجاع URL الصورة
+        except Brovides_services.DoesNotExist:
+            return None
+
+    def get_price(self, obj):
+        return obj.price
+
+    def get_service(self, obj):
+        return obj.order.service.name  # إرجاع اسم الخدمة
+
+    def get_created_at(self, obj):
+        return obj.created_at

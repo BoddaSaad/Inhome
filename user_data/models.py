@@ -9,11 +9,12 @@ class Cuser(AbstractUser):
 
     email = models.EmailField(unique=True)
     Provides_services = models.BooleanField(default=False)
-    request_services = models.BooleanField(default=False)
+    request_services = models.BooleanField(default=True)  # تعديل الحقل ليصبح BooleanField
     phone = models.CharField(max_length=50)
     country = models.CharField(max_length=50)
     location = models.CharField(max_length=500, null=True)
     lan = models.CharField(max_length=50, choices=select_lan, default='A')
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
@@ -28,7 +29,7 @@ class Brovides_services(models.Model):
     pic_id = models.ImageField(upload_to=None)
     pic_id2 = models.ImageField(upload_to=None)
     personlity_pic = models.ImageField(upload_to=None)
-    rating = models.FloatField(default=0)  # متوسط التقييم
+    rating = models.FloatField(default=3)  # متوسط التقييم
 
     def update_rating(self):
         ratings = self.ratings.all()
@@ -56,9 +57,9 @@ class ClientRating(models.Model):
     class Meta:
         unique_together = ('client', 'provider')  # كل مقدم خدمة يمكنه تقييم العميل مرة واحدة فقط
 
-class Request_services(models.Model):
-    user = models.OneToOneField(Cuser, on_delete=models.CASCADE)
-    image=models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=None)
+#class Request_services(models.Model):
+    #user = models.OneToOneField(Cuser, on_delete=models.CASCADE)
+    #image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=None)
 
 class Order_service(models.Model):
     service = models.ForeignKey(Services, on_delete=models.CASCADE)
@@ -66,28 +67,37 @@ class Order_service(models.Model):
     type_service = models.CharField(max_length=500)
     time = models.CharField(max_length=50)
     location = models.CharField(max_length=100)
-    file = models.FileField(upload_to='media/')
+    file = models.FileField(upload_to='media/' ,null=True)
     count = models.PositiveIntegerField(default=1)
 
 class ServiceProviderOffer(models.Model):
+    time_arrive=models.CharField(max_length=50)
     order = models.ForeignKey(Order_service, on_delete=models.CASCADE, related_name="offers")
     provider = models.ForeignKey(Cuser, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)  # تحديد سعر للخدمة
     comment = models.TextField(null=True, blank=True)  # ملاحظات إضافية من مقدم الخدمة
     created_at = models.DateTimeField(auto_now_add=True)
     status_choices = [
+        
         ('P', 'Pending'),
         ('A', 'Accepted'),
         ('R', 'Rejected'),
         ('C', 'Canceled'),
+        ('Complete','Complete')
+        
+        
     ]
-    status = models.CharField(max_length=1, choices=status_choices, default='P')
+    status = models.CharField(max_length=100, choices=status_choices, default='P')
 
 
 class Notfications_Broviders(models.Model):
-    #client=models.ForeignKey(  Cuser ,on_delete=models.CASCADE)
-    title=models.CharField(max_length=300)
-    content=models.CharField(max_length=500)
-    brovider=models.ForeignKey(Brovides_services ,on_delete=models.CASCADE)
+    title = models.CharField(max_length=300)
+    content = models.CharField(max_length=500)
+    brovider = models.ForeignKey(Cuser, on_delete=models.CASCADE)
 
 
+class notfications_client(models.Model):
+    title = models.CharField(max_length=300)
+    content = models.CharField(max_length=500)
+    user = models.ForeignKey(Cuser, on_delete=models.CASCADE)
+    

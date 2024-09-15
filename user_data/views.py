@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 User = get_user_model()
 class SingViewSet(APIView):
     def post(self, request):
@@ -41,6 +42,8 @@ def generate_random_code(length=6):
     return code
     
 class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -61,6 +64,7 @@ class ResetPasswordView(APIView):
 
 
 class CheckCodeView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data.get('email')
         code = request.data.get('code')
@@ -91,6 +95,7 @@ class Change_passviwe(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
         
 class Serviceviewset(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         try:
             service_name = request.query_params.get('name', None)
@@ -141,53 +146,39 @@ class Orderservicevieset(APIView):
 
         
 
-class CuserUpdateView(APIView):
+class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated]
-    def put(self, request, *args, **kwargs):
-        user_id = kwargs.get('id')
+
+    def put(self, request):
         try:
-            user = Cuser.objects.get(id=user_id)
+            user = Cuser.objects.get(email=request.user.email)  # Get the current user
+            serializer = CombinedCuserSerializer(user, data=request.data)  # Pass the user instance and data
+            
+            if serializer.is_valid():  # Validate the data
+                serializer.save()  # Save the changes
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Return validation errors if any
         except Cuser.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = CuserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-class CuserUpdateView_2(APIView):
-    permission_classes = [IsAuthenticated]
-    def put(self, request, *args, **kwargs):
-        user_id = kwargs.get('id')
-        try:
-            user = Cuser.objects.get(id=user_id)
-        except Cuser.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = CuserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class Offered_services(APIView):
     permission_classes=[IsAuthenticated]
-    def get (slef,reuest):
-        try:
-            offer=Order_service.objects.all()
-            serializer=Order_serviceserlizer(offer,many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
-        
+    def get (slef,request):
+        if request.user.Provides_services==True:
+            try:
+                offer=Order_service.objects.all()
+                serializer=Order_serviceserlizer(offer,many=True)
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({
+                "eroor":"this site not aloow for you"
+            })
 
 class detal_service(APIView):
     permission_classes=[IsAuthenticated]
@@ -207,7 +198,7 @@ class detal_service(APIView):
             data = request.data
             data['order'] = order.id
             data['provider'] = provider.id
-
+            data['status'] = 'P'  
             serializer = ServiceProviderOfferSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -221,8 +212,8 @@ class detal_service(APIView):
         try:
             offer = ServiceProviderOffer.objects.get(id=offer_id)
             data = request.data
-            data['status'] = 'A'  # تعيين الحالة هنا إذا كنت تريد تحديثها دائمًا إلى 'A'
-            serializer = ServiceProviderOfferSerializer(offer, data=data, partial=True)
+            data['status'] = 'P'  
+            serializer = ServiceProviderOfferSerializer_put(offer, data=data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -235,15 +226,16 @@ class detal_service(APIView):
 
 
 class All_offers(APIView):
-    def get(self,request):
-        try:    
-            offers = ServiceProviderOffer.objects.all()
-            serializer=OfferPriceSerializer(offers,many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except Exception as e :
-            return Response({'eroor':str(e)},status=status.HTTP_400_BAD_REQUEST) 
-            
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        try:
+            # تصفية العروض بناءً على المستخدم الحالي
+            offers = ServiceProviderOffer.objects.filter(order__user=request.user.id).exclude(status='R')
+            serializer = OfferPriceSerializer(offers, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OfferDecisionView(APIView):
@@ -295,12 +287,15 @@ class AcceptedOffersView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            accepted_offers = ServiceProviderOffer.objects.filter(status='A', order__user=request.user)
-            serializer = OfferPriceSerializer(accepted_offers, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.Provides_services==True:
+            return Response({"eroor":"not allow for you "})
+        else:
+            try:
+                accepted_offers = ServiceProviderOffer.objects.filter(status='A', order__user=request.user)
+                serializer = OfferPriceSerializer(accepted_offers, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CancelServiceProviderOfferView(APIView):
@@ -380,28 +375,12 @@ class SubmitClientRatingView(APIView):
 
 
 class times_provider(APIView):
-    
     def get (slef,request):
-        try:
-
-            times=ServiceProviderOffer.objects.filter(status='A',provider=request.user)
-            serializer=GET_orders(times,many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-class times_provider_cancel(APIView):
-    def get (slef,request):
-        if request.user.Provides_services == True:
+        if request.user.Provides_services == False:
             return Response ({"error":"user not aloow exist here"},status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
-                times=ServiceProviderOffer.objects.filter(status='C',provider=request.user)
+                times=ServiceProviderOffer.objects.filter(status='A',provider=request.user)
                 serializer=GET_orders(times,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
@@ -412,7 +391,124 @@ class times_provider_cancel(APIView):
 
 
 
+class times_provider_cancel(APIView):
+    def get (slef,request):
+        if request.user.Provides_services == False:
+            return Response ({"error":"user not aloow exist here"},status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                times=ServiceProviderOffer.objects.filter(status='C',provider=request.user)
+                serializer=GET_orders(times,many=True)
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
+
+class Notifications(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # جلب جميع الإشعارات المتعلقة بالمزود الذي قام بتسجيل الدخول
+            notifications = Notfications_Broviders.objects.filter(brovider=request.user.id)
+            
+            # تحويل البيانات باستخدام Serializer المناسب (يجب أن تكون قد قمت بإنشاء Serializer للإشعارات)
+            serializer = Noticationserlizer(notifications, many=True)
+            
+            # إرجاع البيانات في استجابة HTTP
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+class CancelOrderView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, order_id):
+        if request.user.Provides_services==True:
+            try:
+                # الحصول على الطلب (Order) بناءً على معرف الطلب
+                order = get_object_or_404(Order_service, id=order_id)
+                
+                # التحقق من أن المستخدم الذي يقوم بالطلب هو مقدم الخدمة المرتبط بالطلب
+                provider_offer = ServiceProviderOffer.objects.filter(order=order, provider=request.user).first()
+                
+                if not provider_offer:
+                    return Response({"error": "You are not authorized to cancel this order."}, status=status.HTTP_403_FORBIDDEN)
+                
+                # تحديث حالة العرض إلى 'Canceled'
+                provider_offer.status = 'C'
+                provider_offer.save()
+                
+                # إنشاء إشعار للعميل
+                notification = notfications_client.objects.create(
+                    title="Order Canceled",
+                    content=f"Your order for service '{order.service.name}' has been canceled by the provider.",
+                    user=order.user
+                )
+                
+                # إرسال الإشعار (يمكنك تخصيص هذا بناءً على متطلباتك)
+                # هنا يتم إرجاع الإشعار مباشرة كجزء من الرد
+                serializer = NotificationSerializer_clent(notification)
+                return Response({"message": "Order has been canceled and notification sent.", "notification": serializer.data}, status=status.HTTP_200_OK)
+
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response({'eroor':'not allow for you'},status=status.HTTP_202_ACCEPTED)
+        
+class Notfi_client(APIView):
+    def get(self,request):
+        
+        try:
+            notif=notfications_client.objects.filter(iser=request.user.id)
+            serializer=NotificationSerializer_clent(notif,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+
+class Get_compleata_for_provider(APIView):
+    
+    def get(self,request):
+        if request.user.Provides_services==False:
+            return Response({"eroor":"you not aloow"})
+        else:
+            try:
+                services_offers=ServiceProviderOffer.objects.filter(provider=request.user,status='Complete')
+                
+                serializer=CompleatService(services_offers,many=True)
+        
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_200_OK
+                    
+                )
+            except Exception as e :
+                return Response(
+                    {"eroor":str(e) },            
+                    status=status.HTTP_400_BAD_REQUEST 
+                )
+                
+
+class ServiceProviderOfferListView(APIView):
+    permission_classes = [IsAuthenticated]
+     
+    def get(self, request, *args, **kwargs):
+        if request.user.Provides_services==True:
+            return Response({"eroor":"you not aloow"})
+        else:
+            offers = ServiceProviderOffer.objects.filter(order__user=request.user,status='Complete')
+            serializer = CompleatService_client(offers, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
@@ -451,3 +547,202 @@ class SocialLoginView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
+class UpdateOfferPriceView(APIView):
+    def put(self, request, offer_id):
+        try:
+            offer = ServiceProviderOffer.objects.get(id=offer_id)
+        except ServiceProviderOffer.DoesNotExist:
+            return Response({"error": "Offer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ServiceProviderOfferUpdateSerializer(offer, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class ReviseOfferAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, offer_id):
+        try:
+            offer = ServiceProviderOffer.objects.get(id=offer_id)
+
+            # تحديث العرض بالحالة الجديدة وغيرها من المعلومات
+            serializer = OfferUpdateSerializer(offer, data=request.data, partial=True)
+            if serializer.is_valid():
+                # تعيين الحالة إلى "Revised"
+                serializer.save(status='V')
+                return Response({"success": "Offer revised successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except ServiceProviderOffer.DoesNotExist:
+            return Response({"error": "Offer not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class Completa_proceser(APIView):
+    def put (self,request,offer_id):
+        try:
+            offer=ServiceProviderOffer.objects.get(id=offer_id)
+            offer.status='Complete'
+            offer.save()
+            notf=Notfications_Broviders.objects.create(
+                    title="الرجاء تسديد الرسوم المطلوبه",
+                    content="اذهب هنا لللمحفظه",
+                    brovider=request.user
+                    
+                )
+            return Response (status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response ({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+import requests
+from rest_framework_simplejwt.tokens import RefreshToken
+class GoogleLoginView(APIView):
+    def get_user_info(self, access_token):
+        user_info_url = 'https://www.googleapis.com/oauth2/v2/userinfo'
+        headers = {'Authorization': f'Bearer {access_token}'}
+        user_info_response = requests.get(user_info_url, headers=headers)
+        return user_info_response.json()
+    
+    def post(self, request, *args, **kwargs):
+        code = request.data.get('code')    
+        
+        # Exchange the authorization code for an access token
+        token_url = 'https://oauth2.googleapis.com/token'
+        client_id = '297166509341-2a60tih8cq8co20bbq83gr4kg5fkd372.apps.googleusercontent.com'
+        client_secret = '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'
+        redirect_uri = 'http://localhost:5173/'  # This should match the redirect URI you used for Google OAuth
+        payload = {
+            'code': code,
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'redirect_uri': redirect_uri,
+            'grant_type': 'authorization_code',
+        }
+
+        # Make a POST request to exchange the code for a token
+        response = requests.post(token_url, data=payload)
+        token_data = response.json()
+
+        if 'access_token' in token_data:
+            # Fetch user info from Google
+            user_info = self.get_user_info(token_data['access_token'])
+
+            # Check if the user already exists, if not, create a new user
+            user, created = Cuser.objects.get_or_create(
+                email=user_info['email'], 
+                defaults={
+                    'username': user_info['name'],
+                    'Provides_services': False,  # Default value, can be adjusted
+                    'request_services': True,    # Default value, can be adjusted
+                    'phone': '',                 # You can update this with actual phone info if available
+                    'country': '',               # Add logic to fetch the country if needed
+                }
+            )
+
+            # Generate JWT token
+            refresh = RefreshToken.for_user(user)
+
+            # Add additional data to the access token payload
+            refresh.payload['full_name'] = user.username  # Adjust if you have a 'full_name' field
+            refresh.payload['email'] = user.email
+            refresh.payload['vendor_id'] = user.vendor.id if hasattr(user, 'vendor') else 0
+
+            return Response({
+                'status': 'success', 
+                'message': 'Google login successful', 
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Failed to authenticate with Google'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+# settings.py
+
+class VodafoneCashPaymentAPIView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        # Step 1: Auth Token
+        auth_token_response = requests.post(settings.PAYMOB_AUTH_URL, json={
+            "api_key": settings.PAYMOB_API_KEY
+        })
+        if auth_token_response.status_code != 201:
+            return Response({"error": "Authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        auth_token = auth_token_response.json().get("token")
+
+        # Step 2: Create Order
+        order_response = requests.post(settings.PAYMOB_ORDER_URL, json={
+            "auth_token": auth_token,
+            "delivery_needed": "false",
+            "amount_cents": request.data.get('amount_cents', 10000),  # Default amount for testing
+            "currency": "EGP",
+           # "merchant_order_id": request.data.get('order_id', '12345'),  # Default order ID for testing
+            "items": []
+        })
+        if order_response.status_code != 201:
+            return Response({"error": "Order creation failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order_data = order_response.json()
+        order_id = order_data.get("id")
+
+        # Step 3: Payment Key
+        payment_key_response = requests.post(settings.PAYMOB_PAYMENT_KEY_URL, json={
+            "auth_token": auth_token,
+            "amount_cents": request.data.get('amount_cents', 10000),  # Default amount for testing
+            "expiration": 3600,
+            "order_id": order_id,
+            "billing_data": {
+                "apartment": "803",  # Default apartment for testing
+                "email": "test@example.com",  # Default email for testing
+                "floor": "1",  # Default floor for testing
+                "first_name": "John",  # Default first name for testing
+                "street": "Main St",  # Default street for testing
+                "building": "123",  # Default building for testing
+                "phone_number": "01010101010",  # Default phone number for testing
+                "shipping_method": "PKG",  # Default shipping method
+                "postal_code": "12345",  # Default postal code for testing
+                "city": "Cairo",  # Default city for testing
+                "country": "EG",  # Default country
+                "last_name": "Doe",  # Default last name for testing
+                "state": "Cairo"  # Default state for testing
+            },
+            "currency": "EGP",
+            "integration_id": settings.PAYMOB_INTEGRATION_ID
+        })
+        if payment_key_response.status_code != 201:
+            return Response({"error": "Failed to create payment key"}, status=status.HTTP_400_BAD_REQUEST)
+
+        payment_token = payment_key_response.json().get("token")
+
+        # Step 4: Redirect URL
+        payment_url = f"{settings.PAYMOB_IFRAME_URL}{settings.PAYMOB_IFRAME_ID}?payment_token={payment_token}"
+
+        return Response({"payment_url": payment_url}, status=status.HTTP_200_OK)

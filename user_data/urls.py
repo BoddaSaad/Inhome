@@ -4,21 +4,56 @@ from .views import *
 urlpatterns = [
 
     path('api/social-login/', SocialLoginView.as_view(), name='social-login'),
+    
     path('resetPassword/',ResetPasswordView.as_view(),name='ResetPasswordView'),
-    path('checkCode',CheckCodeView.as_view(),name='CheckCodeView'),
-    path('change_passviwe',CheckCodeView.as_view(),name='Change_passviwe'),
-    path('all_service',Serviceviewset.as_view(),'all_service'),
-    path('order_service',Orderservicevieset.as_view(),'order_service'),
-    path('userupdate/<int:id>/', CuserUpdateView.as_view(), name='user-update'),
-    path('user/update/<int:id>/', CuserUpdateView_2.as_view(), name='user-update'),
-    path("offer_service", Offered_services, name='offer'),
-    path('order/<int:order_id>/offers/', detal_service.as_view(), name='service_provider_offer'),
+    path('checkCode/',CheckCodeView.as_view(),name='CheckCodeView'),
+    path('change_passviwe/',CheckCodeView.as_view(),name='Change_passviwe'),
+    # we display all service in wep site
+    path('all_service/', Serviceviewset.as_view(), name='all_service'),
+    #detals service 
+    # استخدام id في الـ URL
+    path('order_service/<int:id>/', Orderservicevieset.as_view(), name='order_service'),
+    #updata phone _country _ lan
+    path('userupdate/', UpdateUserView.as_view(), name='user-update'),
+    #display all orders for proivider 
+    path("offer_service/", Offered_services.as_view()),
+    #order detal 
+    #post offer
+    # updata ofeer after cancel 
+    path('order/offers/<int:id>/', detal_service.as_view(), name='service_provider_offer_get'),
+    path('order/<int:order_id>/offers/', detal_service.as_view(), name='service_provider_offer_post'),
+    path('order/offers/update/<int:offer_id>', detal_service.as_view(), name='service_provider_offer_put'),
+
+    #all offer display offer to get on client
     path('all-offers/', All_offers.as_view(), name='all_offers'),
+    #accept or refused order 
     path('offer_decision/<int:offer_id>/', OfferDecisionView.as_view(), name='offer_decision'),
+    #get all offer accpet
     path('accepted_offers/', AcceptedOffersView.as_view(), name='accepted_offers'),
+    
+    #get all cancel offer
+    #path('revise_offer/<int:offer_id>/', ReviseOfferAPIView.as_view(), name='revise_offer'),
+    
     path('cancel_offer/',Get_canceled_offer.as_view(),name="cancel"),
-    path('rate_service/<int:provider_id>/', SubmitRatingView.as_view(), name='rate_service'),
+    
+    #path('rate_service/<int:provider_id>/', SubmitRatingView.as_view(), name='rate_service'),
+    #cancel one offer provider
+    path('cancel_order/<int:order_id>/', CancelOrderView.as_view(), name='cancel_order'),
+    #cancel offer from client 
     path('cancel_offer/<int:offer_id>/', CancelServiceProviderOfferView.as_view(), name='cancel_offer'),
-     path('rate_client/<int:client_id>/', SubmitClientRatingView.as_view(), name='rate_client'),
-  path('rate_service/<int:provider_id>/', SubmitRatingView.as_view(), name='rate_service'),
+    #rate client     
+    path('rate_client/<int:client_id>/', SubmitClientRatingView.as_view(), name='rate_client'),
+    #rate provider 
+    path('rate_service/<int:provider_id>/', SubmitRatingView.as_view(), name='rate_service'),
+    #get provider accep orders
+    path('provider_accept/',times_provider.as_view()),
+    # updata compleat service
+    path("compleat/", Completa_proceser.as_view(), name="completa"),
+    # get compleat servicer for provider
+    path("Get_compleata_for_provider/",Get_compleata_for_provider.as_view()),
+    #get compleat servicer for client
+    path('service-provider-offers/', ServiceProviderOfferListView.as_view(), name='service-provider-offers-list'),
+    path('update_offer_price/<int:offer_id>/', UpdateOfferPriceView.as_view(), name='update_offer_price'),
+    path('vodafone-cash-payment/', VodafoneCashPaymentAPIView.as_view(), name='vodafone-cash-payment'),
+  
 ]
