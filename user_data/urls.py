@@ -2,7 +2,7 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-
+    path('sing/',SingViewSet.as_view(),'sing'),
     path('api/social-login/', SocialLoginView.as_view(), name='social-login'),
     
     path('resetPassword/',ResetPasswordView.as_view(),name='ResetPasswordView'),
@@ -52,6 +52,7 @@ urlpatterns = [
     # get compleat servicer for provider
     path("Get_compleata_for_provider/",Get_compleata_for_provider.as_view()),
     #get compleat servicer for client
+    
     path('service-provider-offers/', ServiceProviderOfferListView.as_view(), name='service-provider-offers-list'),
     path('update_offer_price/<int:offer_id>/', UpdateOfferPriceView.as_view(), name='update_offer_price'),
     path('vodafone-cash-payment/', VodafoneCashPaymentAPIView.as_view(), name='vodafone-cash-payment'),
