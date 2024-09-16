@@ -2,7 +2,8 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('sing/',SingViewSet.as_view(),'sing'),
+    path('sing/',SingViewSet.as_view(),name='sing'),
+    
     path('api/social-login/', SocialLoginView.as_view(), name='social-login'),
     
     path('resetPassword/',ResetPasswordView.as_view(),name='ResetPasswordView'),
