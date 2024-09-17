@@ -25,15 +25,17 @@ class SingViewSet(APIView):
 
 ##
 class Brovicevieset(APIView):
-    def post(self,request):
+    def post(self, request):
         try:
-            data=request.data 
-            serializer=Brovice_data(data=data)
-            brovice=serializer.save()
-            return Response({"account":"is active now "},status=status.HTTP_200_OK)
-        except Exception as e :
-            return Response ({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
-        
+            data = request.data
+            serializer = Brovice_data(data=data)
+            if serializer.is_valid():
+                brovice = serializer.save()
+                return Response({"account": "is active now"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -80,9 +82,11 @@ class CheckCodeView(APIView):
             return Response({"error": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST)
         
 class Change_passviwe(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self,request):
         data=request.data 
-        serializer=Change_password(data)
+        serializer=Change_password(data=data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
             password = serializer.validated_data['password']

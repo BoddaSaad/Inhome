@@ -9,14 +9,20 @@ class Cuser(AbstractUser):
 
     email = models.EmailField(unique=True)
     Provides_services = models.BooleanField(default=False)
-    request_services = models.BooleanField(default=True)  # تعديل الحقل ليصبح BooleanField
+    request_services = models.BooleanField(default=True)
     phone = models.CharField(max_length=50)
     country = models.CharField(max_length=50)
     location = models.CharField(max_length=500, null=True)
     lan = models.CharField(max_length=50, choices=select_lan, default='A')
-    
+    name = models.CharField(max_length=150)
+
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['name']  # تغيير الحقل المطلوب هنا
+
+    def __str__(self):
+        return self.email
+
+    
 
 class Services(models.Model):
     name = models.CharField(max_length=50)

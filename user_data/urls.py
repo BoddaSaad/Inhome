@@ -3,12 +3,12 @@ from .views import *
 
 urlpatterns = [
     path('sing_up/',SingViewSet.as_view(),name='sing'),
-    
-    path('api/social-login/', SocialLoginView.as_view(), name='social-login'),
+    path("active_provider/", Brovicevieset.as_view(), name="Brovicevieset"),
+    #path('api/social-login/', SocialLoginView.as_view(), name='social-login'),
     
     path('resetPassword/',ResetPasswordView.as_view(),name='ResetPasswordView'),
     path('checkCode/',CheckCodeView.as_view(),name='CheckCodeView'),
-    path('change_passviwe/',CheckCodeView.as_view(),name='Change_passviwe'),
+    path('change_passviwe/',Change_passviwe.as_view(),name='Change_passviwe'),
     # we display all service in wep site
     path('all_service/', Serviceviewset.as_view(), name='all_service'),
     #detals service 
