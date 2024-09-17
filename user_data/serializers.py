@@ -12,7 +12,7 @@ class SingUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cuser
-        fields = ['firs_name', 'email', 'password', 'password2', 'phone', 'Provides_services', 'request_services']
+        fields = [ 'username', 'email', 'password', 'password2', 'phone', 'Provides_services', 'request_services']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -23,13 +23,12 @@ class SingUpSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         if Cuser.objects.filter(email=value).exists():
             raise serializers.ValidationError('This email is already in use')
-        django_validate_email(value)
         return value
 
     def create(self, validated_data):
         validated_data.pop('password2')
         user = Cuser.objects.create(
-            firs_name=validated_data['firs_name'],
+            username=validated_data['username'],
             email=validated_data['email'],
             phone=validated_data['phone'],
             Provides_services=validated_data['Provides_services'],
@@ -37,7 +36,6 @@ class SingUpSerializer(serializers.ModelSerializer):
             password=make_password(validated_data['password']),
         )
         return user
-
 
 class Brovice_data(serializers.ModelSerializer):
     class Meta:
