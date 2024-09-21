@@ -108,9 +108,17 @@ class Serviceserleszer(serializers.ModelSerializer):
 
 
 class Order_serviceserlizer(serializers.ModelSerializer):
+    service_name = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+
     class Meta:
         model=Order_service
         fields='__all__'
+    def get_service_name(self, obj):
+        return obj.service.name  # Assuming the service model has a 'name' field
+
+    def get_name(self, obj):
+        return obj.user.username  
 
 
 
@@ -119,7 +127,7 @@ class CombinedCuserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cuser
-        fields = ['country', 'lan', 'phone','location']
+        fields = ['country', 'lan', 'phone','location','username']
         
 
     #def validate(self, attrs):
@@ -149,22 +157,32 @@ class ServiceProviderOfferSerializer_put(serializers.ModelSerializer):
         read_only_fields = ['created_at']
 
 
+
+
+
+
+
 class OfferPriceSerializer(serializers.ModelSerializer):
     provider_name = serializers.SerializerMethodField()
     provider_pic = serializers.SerializerMethodField()
     service_name = serializers.SerializerMethodField()
     email=serializers.SerializerMethodField()
     phone=serializers.SerializerMethodField()
+    id_provider=serializers.SerializerMethodField()
+    
 
     class Meta:
         model = ServiceProviderOffer
-        fields = fields = ['id', 'provider_name', 'provider_pic', 'time_arrive', 'price', 'comment', 'created_at', 'status', 'order', 'provider', 'service_name','email','phone']
-          
+        fields = fields = ['id', 'provider_name', 'provider_pic', 'time_arrive', 'price', 'comment', 'created_at', 'status', 'order', 'provider', 'service_name','email','phone','id_provider']
+    def get_id_provider(slef,obj):
+        id=obj.provider.id
+        return id 
+    
 
     def get_provider_name(self, obj):
         try:
             brovide_service = Brovides_services.objects.get(user=obj.provider)
-            return brovide_service.user.first_name
+            return brovide_service.user.username
         except Brovides_services.DoesNotExist:
             return None
 
@@ -207,7 +225,14 @@ class OfferPriceSerializer(serializers.ModelSerializer):
         except Brovides_services.DoesNotExist:
             return None
 
+
         
+
+
+
+
+
+
 
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -239,14 +264,17 @@ class GET_orders(serializers.ModelSerializer):
     def get_order_details(self, obj):
         order = obj.order
         return {
+
             "service": order.service.name,
-            "user": order.user.first_name,
+            "user": order.user.username,
             "type_service": order.type_service,
             "time": order.time,
             "location": order.location,
             "file": order.file.url,
             "count": order.count
+        
         }
+        
 
 
 
@@ -347,3 +375,10 @@ class CompleatService_client(serializers.ModelSerializer):
 
     def get_created_at(self, obj):
         return obj.created_at
+    
+    
+class Offers(serializers.ModelSerializer):
+    class Meta:
+        model=ServiceProviderOffer
+        fields='__all__'
+        
