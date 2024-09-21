@@ -6,12 +6,17 @@ from .serializers import SingUpSerializer
 from .models import *
 from .serializers import *
 import random
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
 User = get_user_model()
 class SingViewSet(APIView):
     permission_classes = [AllowAny]
@@ -22,6 +27,14 @@ class SingViewSet(APIView):
             user = serializer.save()
             return Response({"message": "User created successfully", "user_id": user.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserDetailView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 ##
 class Brovicevieset(APIView):
@@ -116,8 +129,24 @@ class Serviceviewset(APIView):
 
 class Orderservicevieset(APIView):
     permission_classes = [IsAuthenticated]
+    
+    
+    def get_permissions(self):
+        """
+        تخصيص الأذونات بناءً على نوع الطلب (GET أو POST)
+        """
+        if self.request.method == 'GET':
+            # السماح للجميع (بما في ذلك المستخدمين غير المصادقين) باستخدام GET
+            return [AllowAny()]
+        # السماح فقط للمستخدمين المصادقين باستخدام POST
+        return [IsAuthenticated()]
+    
+    
+    
+    
 
     def get(self, request, id):
+        
         try:
             service = Services.objects.get(id=id)
             serializer = Serviceserleszer(service)
@@ -128,29 +157,36 @@ class Orderservicevieset(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, id):
-        try:
-            service = Services.objects.get(id=id)
-            user = request.user
+    
+        if request.user.Provides_services==True:
+            return Response({
+                "hi":"You are not allowed to be here"
+            })
+        else:
+            
+            try:
+                service = Services.objects.get(id=id)
+                user = request.user
 
-            # نسخ البيانات وتحديث الحقول المطلوبة
-            data = request.data.copy()
-            data['user'] = user.id
-            data['service'] = service.id
+                # نسخ البيانات وتحديث الحقول المطلوبة
+                data = request.data.copy()
+                data['user'] = user.id
+                data['service'] = service.id
 
-            serializer = Order_serviceserlizer(data=data)
+                serializer = Order_serviceserlizer(data=data)
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response({"done": "Order created successfully"}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Services.DoesNotExist:
-            return Response({"error": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({"done": "Order created successfully"}, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except Services.DoesNotExist:
+                return Response({"error": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-     
+    
 
 class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated]
@@ -198,22 +234,30 @@ class detal_service(APIView):
         
 
     def post(self, request, order_id):
-        try:
-            order = Order_service.objects.get(id=order_id)
-            provider = request.user
-            data = request.data
-            data['order'] = order.id
-            data['provider'] = provider.id
-            data['status'] = 'P'  
-            serializer = ServiceProviderOfferSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.Provides_services==False:
+            return Response({"hi":"You are not allowed to be here"})
+        else:
+            try:
+                order = Order_service.objects.get(id=order_id)
+                provider = request.user
+                data = request.data
+                data['order'] = order.id
+                data['provider'] = provider.id
+                data['status'] = 'P'  
+                serializer = ServiceProviderOfferSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except IntegrityError:
+                return Response({"error": "You have already submitted an offer for this order."}, status=400)
 
+                        
+            
+            
     def put(self, request, offer_id):
         try:
             offer = ServiceProviderOffer.objects.get(id=offer_id)
@@ -246,6 +290,16 @@ class All_offers(APIView):
 
 class OfferDecisionView(APIView):
     permission_classes = [IsAuthenticated]
+    # def get(self,request):
+    #     try:
+    #         offers=ServiceProviderOffer.objects.filter(order__user=request.id).exclude(status='R')
+    #         serializer=Offers(offers,many=True)
+    #         return Response(serializer.data,status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         return Response({
+    #             "eroor":str(e)
+    #         })
+        
 
     def post(self, request, offer_id):
         try:
@@ -334,47 +388,75 @@ class CancelServiceProviderOfferView(APIView):
 
 class Get_canceled_offer(APIView):
     def get(slef,request):
-        try:
-            offer_canceled=ServiceProviderOffer.objects.filter(status='C', order__user=request.user)
-            serializer=OfferPriceSerializer(offer_canceled,many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except ServiceProviderOffer.DoesNotExist:
-            return Response({"error": "Offer not found."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.Provides_services==True:
+            return Response(
+               {
+                   "hi":"not aloow for you"
+            })
+        else:
+            try:
+                offer_canceled=ServiceProviderOffer.objects.filter(status='C', order__user=request.user)
+                serializer=OfferPriceSerializer(offer_canceled,many=True)
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            except ServiceProviderOffer.DoesNotExist:
+                return Response({"error": "Offer not found."}, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
 
 
 
 class SubmitRatingView(APIView):
     permission_classes = [IsAuthenticated]
-
     def post(self, request, provider_id):
-        try:
-            provider = Brovides_services.objects.get(id=provider_id)
-            serializer = RatingSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(user=request.user, service_provider=provider)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Brovides_services.DoesNotExist:
-            return Response({"error": "مقدم الخدمة غير موجود"}, status=status.HTTP_404_NOT_FOUND)
+        if request.user.Provides_services==True:
+            return Response({
+                "eroor":"not aloow for you"
+            })
+        else:
+            
+            try:
+                provider = Brovides_services.objects.get(user__id=provider_id)
+                data = request.data.copy()
+                data['service_provider']=provider.id
+                serializer = RatingSerializer(data=data)
+                if Rating.objects.filter(service_provider=provider, user=request.user).exists():
+                    return Response({"error": "لقد قمت بالفعل بتقييم هذا مقدم الخدمة."}, status=status.HTTP_400_BAD_REQUEST)
+
+                if serializer.is_valid():
+                    serializer.save(user=request.user, service_provider=provider)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except Brovides_services.DoesNotExist:
+                return Response({"error": "مقدم الخدمة غير موجود"}, status=status.HTTP_404_NOT_FOUND)
 
 class SubmitClientRatingView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, client_id):
-        provider = request.user
-        client = get_object_or_404(Cuser, id=client_id)
+        if request.user.Provides_services==False:
+            return Response( {
+                "hi":"not allow for you"
+            })
+            
+        else:     
+            provider = request.user
+            client = get_object_or_404(Cuser, id=client_id)
 
-        data = request.data.copy()
-        data['provider'] = provider.id
-        data['client'] = client.id
+            data = request.data.copy()
+            data['provider'] = provider.id
+            data['client'] = client.id
 
-        serializer = ClientRatingSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = ClientRatingSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -441,23 +523,26 @@ class CancelOrderView(APIView):
         if request.user.Provides_services==True:
             try:
                 # الحصول على الطلب (Order) بناءً على معرف الطلب
-                order = get_object_or_404(Order_service, id=order_id)
+                #order = get_object_or_404(Order_service, id=order_id)
                 
                 # التحقق من أن المستخدم الذي يقوم بالطلب هو مقدم الخدمة المرتبط بالطلب
-                provider_offer = ServiceProviderOffer.objects.filter(order=order, provider=request.user).first()
+                provider_offer = ServiceProviderOffer.objects.filter(id=order_id, provider=request.user).first()
                 
                 if not provider_offer:
                     return Response({"error": "You are not authorized to cancel this order."}, status=status.HTTP_403_FORBIDDEN)
                 
-                # تحديث حالة العرض إلى 'Canceled'
+                # تحديث حالة العرض إلى 'Canceled' 
+                if provider_offer.status=='C':
+                    return Response("offer canceled already" ,status=status.HTTP_226_IM_USED)
+                
                 provider_offer.status = 'C'
                 provider_offer.save()
                 
                 # إنشاء إشعار للعميل
                 notification = notfications_client.objects.create(
                     title="Order Canceled",
-                    content=f"Your order for service '{order.service.name}' has been canceled by the provider.",
-                    user=order.user
+                    content=f"Your order for service '{provider_offer.order.service.name}' has been canceled by the provider.",
+                    user=provider_offer.order.user
                 )
                 
                 # إرسال الإشعار (يمكنك تخصيص هذا بناءً على متطلباتك)
@@ -492,7 +577,7 @@ class Get_compleata_for_provider(APIView):
                 services_offers=ServiceProviderOffer.objects.filter(provider=request.user,status='Complete')
                 
                 serializer=CompleatService(services_offers,many=True)
-        
+                
                 return Response(
                     serializer.data,
                     status=status.HTTP_200_OK
@@ -603,11 +688,11 @@ class Completa_proceser(APIView):
                     brovider=request.user
                     
                 )
+            ServiceProviderOffer.delete
             return Response (status=status.HTTP_200_OK)
         except Exception as e:
             return Response ({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
-        
-        
+
         
         
         

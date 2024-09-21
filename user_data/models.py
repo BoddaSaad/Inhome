@@ -17,7 +17,7 @@ class Cuser(AbstractUser):
     name = models.CharField(max_length=150)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']  # تغيير الحقل المطلوب هنا
+    REQUIRED_FIELDS = ['username']  # تغيير الحقل المطلوب هنا
 
     def __str__(self):
         return self.email
@@ -28,6 +28,8 @@ class Services(models.Model):
     name = models.CharField(max_length=50)
     photo = models.ImageField(upload_to=None)
     detal = models.TextField()
+    def __str__(self) -> str:
+        return self.name
 
 class Brovides_services(models.Model):
     user = models.OneToOneField(Cuser, on_delete=models.CASCADE)
@@ -35,7 +37,12 @@ class Brovides_services(models.Model):
     pic_id = models.ImageField(upload_to=None)
     pic_id2 = models.ImageField(upload_to=None)
     personlity_pic = models.ImageField(upload_to=None)
-    rating = models.FloatField(default=3)  # متوسط التقييم
+    rating = models.FloatField(default=3)
+    # متوسط التقييم
+    def __str__(self) -> str:
+        return self.user.username
+    
+
 
     def update_rating(self):
         ratings = self.ratings.all()
@@ -74,7 +81,11 @@ class Order_service(models.Model):
     time = models.CharField(max_length=50)
     location = models.CharField(max_length=100)
     file = models.FileField(upload_to='media/' ,null=True)
+    descrtion=models.TextField()
     count = models.PositiveIntegerField(default=1)
+    def __str__(self) -> str:
+        return self.type_service
+
 
 class ServiceProviderOffer(models.Model):
     time_arrive=models.CharField(max_length=50)
@@ -94,12 +105,23 @@ class ServiceProviderOffer(models.Model):
         
     ]
     status = models.CharField(max_length=100, choices=status_choices, default='P')
+    
+    class Meta:
+        constraints = [
+        models.UniqueConstraint(fields=['order', 'provider'], name='unique_provider_offer_per_order')
+    ]
+    
+    def __str__(self) -> str:
+        return f"عرض:{self.order.service.name}"
+    
 
 
 class Notfications_Broviders(models.Model):
     title = models.CharField(max_length=300)
     content = models.CharField(max_length=500)
     brovider = models.ForeignKey(Cuser, on_delete=models.CASCADE)
+    def __str__(self) -> str:
+        return self.title
 
 
 class notfications_client(models.Model):
@@ -107,3 +129,5 @@ class notfications_client(models.Model):
     content = models.CharField(max_length=500)
     user = models.ForeignKey(Cuser, on_delete=models.CASCADE)
     
+    def __str__(self) -> str:
+        return self.title
