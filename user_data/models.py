@@ -32,8 +32,8 @@ class Services(models.Model):
         return self.name
 
 class Brovides_services(models.Model):
-    user = models.ForeignKey(Cuser, on_delete=models.CASCADE)
-    service = models.OneToOneField(Services, on_delete=models.CASCADE)
+    user = models.OneToOneField(Cuser, on_delete=models.CASCADE)
+    service = models.ForeignKey(Services, on_delete=models.CASCADE)
     pic_id = models.ImageField(upload_to=None)
     pic_id2 = models.ImageField(upload_to=None)
     personlity_pic = models.ImageField(upload_to=None)
