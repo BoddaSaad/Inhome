@@ -496,6 +496,10 @@ class Notifications(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        if request.user.Provides_services==False:
+            return Response(
+                "not allow for you"
+            )
         try:
             # جلب جميع الإشعارات المتعلقة بالمزود الذي قام بتسجيل الدخول
             notifications = Notfications_Broviders.objects.filter(brovider=request.user.id)
@@ -558,9 +562,12 @@ class CancelOrderView(APIView):
         
 class Notfi_client(APIView):
     def get(self,request):
-        
+        if request.user.Provides_services==True:
+            return Response(
+                "not allow for you"
+            )
         try:
-            notif=notfications_client.objects.filter(iser=request.user.id)
+            notif=notfications_client.objects.filter(user=request.user.id)
             serializer=NotificationSerializer_clent(notif,many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e:
@@ -588,7 +595,37 @@ class Get_compleata_for_provider(APIView):
                     {"eroor":str(e) },            
                     status=status.HTTP_400_BAD_REQUEST 
                 )
+
+
+
+class Get_compleata_for_client(APIView):
+    
+    def get(self,request):
+        if request.user.Provides_services==True:
+            return Response({"eroor":"you not aloow"})
+        else:
+            try:
+                services_offers=ServiceProviderOffer.objects.filter(order__user=request.user,status='Complete')
                 
+                serializer=CompleatService(services_offers,many=True)
+                
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_200_OK
+                    
+                )
+            except Exception as e :
+                return Response(
+                    {"eroor":str(e) },            
+                    status=status.HTTP_400_BAD_REQUEST 
+                )
+
+
+
+
+
+
+
 
 class ServiceProviderOfferListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -598,7 +635,7 @@ class ServiceProviderOfferListView(APIView):
             return Response({"eroor":"you not aloow"})
         else:
             offers = ServiceProviderOffer.objects.filter(order__user=request.user,status='Complete')
-            serializer = CompleatService_client(offers, many=True)
+            serializer = CompleatService(offers, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -675,24 +712,83 @@ class ReviseOfferAPIView(APIView):
             return Response({"error": "Offer not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 class Completa_proceser(APIView):
-    def put (self,request,offer_id):
-        try:
-            offer=ServiceProviderOffer.objects.get(id=offer_id)
-            offer.status='Complete'
-            offer.save()
-            notf=Notfications_Broviders.objects.create(
-                    title="الرجاء تسديد الرسوم المطلوبه",
-                    content="اذهب هنا لللمحفظه",
+    def put(self, request, offer_id):
+        if request.user.Provides_services:
+            try:
+                # الحصول على العرض والتحقق من وجوده
+                offer = ServiceProviderOffer.objects.get(id=offer_id)
+                
+                # التحقق مما إذا كان العرض مكتمل بالفعل
+                if offer.status == "Complete":
+                    return Response({"message": "This offer is already complete."})
+                
+                # تحديث حالة العرض إلى "Complete"
+                offer.status = 'Complete'
+                offer.save()
+                
+                # تحديث مديونية مقدم الخدمة
+                provider = Brovides_services.objects.get(user=request.user)
+                price_offer = int(offer.price)
+                provider.indebtedness += price_offer
+                provider.save()
+                
+                # إنشاء إشعار لمقدم الخدمة
+                Notfications_Broviders.objects.create(
+                    title="الرجاء تسديد الرسوم المطلوبة",
+                    content="اذهب هنا للمحفظة",
                     brovider=request.user
-                    
                 )
-            ServiceProviderOffer.delete
-            return Response (status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response ({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
+                return Response(status=status.HTTP_200_OK)
+                
+            except ServiceProviderOffer.DoesNotExist:
+                return Response({"error": "Offer not found."}, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"error": "You are not allowed to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+
+class Completa_proceser_client(APIView):
+    def put(self, request, offer_id):
+        if request.user.request_services:
+            try:
+                # الحصول على العرض والتحقق من وجوده
+                offer = ServiceProviderOffer.objects.get(id=offer_id)
+                
+                # التحقق مما إذا كان العرض مكتمل بالفعل
+                if offer.status == 'Complete':
+                    return Response({"message": "This offer is already complete."})
+                
+                # تحديث حالة العرض إلى "Complete"
+                offer.status = 'Complete'
+                offer.save()
+                
+                provider = Brovides_services.objects.get(user=offer.provider)
+                price_offer = int(offer.price)
+                provider.indebtedness += price_offer
+                provider.save()
+
+                
+                # إنشاء إشعار لمقدم الخدمة
+                Notfications_Broviders.objects.create(
+                    title="الرجاء تسديد الرسوم المطلوبة",
+                    content="اذهب هنا للمحفظة",
+                    brovider=provider.user
+                )
+                
+                return Response({"done":"done"},status=status.HTTP_200_OK)
+                
+            except ServiceProviderOffer.DoesNotExist:
+                return Response({"error": "Offer not found."}, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"error": "You are not allowed to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+        
+        
         
         
         

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.core.exceptions import ValidationError
 class Cuser(AbstractUser):
     select_lan = [
         ("A", "Arabic"),
@@ -32,12 +32,25 @@ class Services(models.Model):
         return self.name
 
 class Brovides_services(models.Model):
-    user = models.OneToOneField(Cuser, on_delete=models.CASCADE)
+    user = models.ForeignKey(Cuser, on_delete=models.CASCADE)
     service = models.OneToOneField(Services, on_delete=models.CASCADE)
     pic_id = models.ImageField(upload_to=None)
     pic_id2 = models.ImageField(upload_to=None)
     personlity_pic = models.ImageField(upload_to=None)
     rating = models.FloatField(default=3)
+    indebtedness=models.IntegerField(default=0)
+    
+    
+    
+    def clean(self):
+        # التحقق مما إذا كان المستخدم يقدم خدمات
+        if not self.user.Provides_services:
+            raise ValidationError("This user is not allowed to provide services.")
+
+    def save(self, *args, **kwargs):
+        self.clean()  # استدعاء التحقق قبل الحفظ
+        super(Brovides_services, self).save(*args, **kwargs)
+
     # متوسط التقييم
     def __str__(self) -> str:
         return self.user.username

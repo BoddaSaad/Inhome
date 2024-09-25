@@ -55,11 +55,17 @@ urlpatterns = [
     
     path("compleat/<int:offer_id>/", Completa_proceser.as_view(), name="completa"),
     # get compleat servicer for provider
+    path("Completa_proceser_client/<int:offer_id>/", Completa_proceser_client.as_view(), name="Completa_proceser_client"),
+    
     path("Get_compleata_for_provider/",Get_compleata_for_provider.as_view()),
     #get compleat servicer for client
+    path("Get_compleata_for_client/", Get_compleata_for_client.as_view(), name="Get_compleata_for_client"),
     
-    path('service-provider-offers/', ServiceProviderOfferListView.as_view(), name='service-provider-offers-list'),
-    path('update_offer_price/<int:offer_id>/', UpdateOfferPriceView.as_view(), name='update_offer_price'),
+    #path('service-provider-offers/', ServiceProviderOfferListView.as_view(), name='service-provider-offers-list'),
+    #path('update_offer_price/<int:offer_id>/', UpdateOfferPriceView.as_view(), name='update_offer_price'),
+    path("notfications_provider/", Notifications.as_view(), name="Notifications"),
+    path("notfications_client/", Notfi_client.as_view(), name="Notfi_client"),
     path('vodafone-cash-payment/', VodafoneCashPaymentAPIView.as_view(), name='vodafone-cash-payment'),
+    
   
 ]

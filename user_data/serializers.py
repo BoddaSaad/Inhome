@@ -302,7 +302,7 @@ class OfferUpdateSerializer(serializers.ModelSerializer):
 
 class Noticationserlizer(serializers.ModelSerializer):
     class Meta:
-        models=Notfications_Broviders
+        model=Notfications_Broviders
         fields="__all__"
         
         
@@ -319,13 +319,17 @@ class CompleatService(serializers.ModelSerializer):
     price = serializers.SerializerMethodField()
     service = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
-
+    provider=serializers.SerializerMethodField()
+    
     class Meta:
         model = ServiceProviderOffer  # Corrected from 'models'
         fields = '__all__'
 
+    def get_provider(self,obj):
+        return obj.provider.username
+    
     def get_name(self, obj):
-        client = obj.order.user.first_name
+        client = obj.order.user.username
         return client
 
     def get_location(self, obj):
@@ -343,6 +347,18 @@ class CompleatService(serializers.ModelSerializer):
     def get_created_at(self, obj):
         return obj.created_at
     
+    
+# class CompleatServiceWithProvider(CompleatService):
+#     provider_name = serializers.SerializerMethodField()
+
+#     class Meta(CompleatService.Meta):
+#         fields = CompleatService.Meta.fields + ['provider_name']  # إضافة الحقل الجديد إلى القائمة
+
+#     def get_provider_name(self, obj):
+#         return obj.provider.username  # استخراج اسم مقدم الخدمة
+
+
+
 
 class CompleatService_client(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
