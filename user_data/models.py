@@ -39,6 +39,8 @@ class Brovides_services(models.Model):
     personlity_pic = models.ImageField(upload_to=None)
     rating = models.FloatField(default=3)
     indebtedness=models.IntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+    
     
     
     
@@ -48,7 +50,8 @@ class Brovides_services(models.Model):
             raise ValidationError("This user is not allowed to provide services.")
 
     def save(self, *args, **kwargs):
-        self.clean()  # استدعاء التحقق قبل الحفظ
+        self.clean()
+        self.indebtedness=self.indebtedness/10
         super(Brovides_services, self).save(*args, **kwargs)
 
     # متوسط التقييم
