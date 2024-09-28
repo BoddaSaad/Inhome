@@ -215,9 +215,9 @@ PAYMOB_ORDER_URL = 'https://accept.paymobsolutions.com/api/ecommerce/orders'
 PAYMOB_PAYMENT_KEY_URL = 'https://accept.paymobsolutions.com/api/acceptance/payment_keys'
 PAYMOB_IFRAME_URL = 'https://accept.paymobsolutions.com/api/acceptance/iframes/'
 
-#CRONJOBS = [
- #   ('0 * * * *', 'user_data.cron.my_cron_job'),
-#]
 CRONJOBS = [
-    ('* * * * *', 'user_data.cron.my_cron_job'),
+    ('0 * * * *', 'user_data.cron.my_cron_job'),
 ]
+#CRONJOBS = [
+#    ('* * * * *', 'user_data.cron.my_cron_job'),
+#
