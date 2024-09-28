@@ -3,7 +3,7 @@ from django.utils import timezone
 from .models import Brovides_services
 
 def my_cron_job():
-    ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+    ten_minutes_ago = timezone.now() - timedelta(days=5)
     
     # البحث عن الحسابات التي لم تصبح مديونيتها صفر منذ أكثر من 10 دقائق
     overdue_providers = Brovides_services.objects.filter(
