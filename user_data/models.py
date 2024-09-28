@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 class Cuser(AbstractUser):
     select_lan = [
         ("A", "Arabic"),
@@ -39,17 +40,21 @@ class Brovides_services(models.Model):
     personlity_pic = models.ImageField(upload_to=None)
     rating = models.FloatField(default=3)
     indebtedness=models.IntegerField(default=0)
+    debt_cleared_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     
     
     
     def clean(self):
+     
         # التحقق مما إذا كان المستخدم يقدم خدمات
         if not self.user.Provides_services:
             raise ValidationError("This user is not allowed to provide services.")
 
     def save(self, *args, **kwargs):
+        if self.indebtedness == 0:
+            self.debt_cleared_at = timezone.now()
         self.clean()
         self.indebtedness=self.indebtedness/10
         super(Brovides_services, self).save(*args, **kwargs)
