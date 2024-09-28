@@ -320,11 +320,15 @@ class CompleatService(serializers.ModelSerializer):
     service = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
     provider=serializers.SerializerMethodField()
-    
+    image=serializers.SerializerMethodField()
     class Meta:
         model = ServiceProviderOffer  # Corrected from 'models'
         fields = '__all__'
 
+
+    def get_image(self,obj):
+        return obj.order.file.url
+    
     def get_provider(self,obj):
         return obj.provider.username
     
