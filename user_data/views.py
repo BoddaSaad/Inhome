@@ -210,6 +210,10 @@ class UpdateUserView(APIView):
 class Offered_services(APIView):
     permission_classes=[IsAuthenticated]
     def get (slef,request):
+        if request.user.is_active==False:
+            return Response({
+                "please":"Please pay the debt"
+            })
         if request.user.Provides_services==True:
             try:
                 offer=Order_service.objects.all()
@@ -714,6 +718,10 @@ class ReviseOfferAPIView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 class Completa_proceser(APIView):
     def put(self, request, offer_id):
+        if request.user.is_active==False:
+            return Response({
+                "please":"Please pay the debt"
+            })
         if request.user.Provides_services:
             try:
                 # الحصول على العرض والتحقق من وجوده
@@ -865,18 +873,107 @@ class GoogleLoginView(APIView):
         
         
         
+    
+        
+        
+        
+# class VodafoneCashPaymentAPIView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     def post(self, request):
+        
+#         indebtednes=Brovides_services.objects.get(user=request.user)
+#         amount=indebtednes.indebtedness
+#         user=request.user
+#         print(amount)
         
         
         
         
-        
-        
-# settings.py
+#         # Step 1: Auth Token
+#         auth_token_response = requests.post(settings.PAYMOB_AUTH_URL, json={
+#             "api_key": settings.PAYMOB_API_KEY
+#         })
+#         if auth_token_response.status_code != 201:
+#             return Response({"error": "Authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+#         auth_token = auth_token_response.json().get("token")
+
+#         # Step 2: Create Order
+#         print("llllllllllllllllllll")
+#         order_response = requests.post(settings.PAYMOB_ORDER_URL, json={
+#             "auth_token": auth_token,
+#             "delivery_needed": "false",
+#             "amount": int(amount),  
+#             "currency": "EGP",
+#             "expiration": 5800,
+#             "payment_methods": [122, "’Mobile"],
+#             "items": [
+#                 {
+#                     "name": "service",
+#                     "amount": int(amount),
+#                     "description": "service",
+#                     "quantity": 1
+#                 }
+#             ]
+#         })
+#         if order_response.status_code != 201 :
+#             return Response({"error": "Order creation failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+#         order_data = order_response.json()
+#         order_id = order_data.get("id")
+
+#         # Step 3: Payment Key
+#         print("llllllllllllllllllll")
+#         payment_key_response = requests.post(settings.PAYMOB_PAYMENT_KEY_URL, json={
+#             "auth_token": auth_token,
+#             "amount_cents": request.data.get('amount_cents', 10000),  # Default amount for testing
+#             "expiration": 3600,
+#             "order_id": order_id,
+#             "billing_data": {
+#                 "apartment": "803",  # Default apartment for testing
+#                 "email": user.email,  # Default email for testing
+#                 "floor": "1",  # Default floor for testing
+#                 "first_name": user.username,  # Default first name for testing
+#                 "street": "Main St",  # Default street for testing
+#                 "building": "123",  # Default building for testing
+#                 "phone_number": user.phone,  # Default phone number for testing
+#                 "shipping_method": "PKG",  # Default shipping method
+#                 "postal_code": "12345",  # Default postal code for testing
+#                 "city": "Cairo",  # Default city for testing
+#                 "country": "EG",  # Default country
+#                 "last_name": "Doe",  # Default last name for testing
+#                 "state": "Cairo"  # Default state for testing
+#             },
+#             "currency": "EGP",
+#             "integration_id": settings.PAYMOB_INTEGRATION_ID
+#         })
+#         if payment_key_response.status_code != 201:
+#             return Response({"error": "Failed to create payment key"}, status=status.HTTP_400_BAD_REQUEST)
+
+#         payment_token = payment_key_response.json().get("token")
+
+#         # Step 4: Redirect URL
+#         payment_url = f"{settings.PAYMOB_IFRAME_URL}{settings.PAYMOB_IFRAME_ID}?payment_token={payment_token}"
+
+#         return Response({"payment_url": payment_url}, status=status.HTTP_200_OK)
+    
+    
+    
+
 
 class VodafoneCashPaymentAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    
     def post(self, request):
-        # Step 1: Auth Token
+        indebtednes=Brovides_services.objects.get(user=request.user)
+        amount=indebtednes.indebtedness
+        user=request.user
+       
+        
+        
+        
+        
+        
         auth_token_response = requests.post(settings.PAYMOB_AUTH_URL, json={
             "api_key": settings.PAYMOB_API_KEY
         })
@@ -889,11 +986,21 @@ class VodafoneCashPaymentAPIView(APIView):
         order_response = requests.post(settings.PAYMOB_ORDER_URL, json={
             "auth_token": auth_token,
             "delivery_needed": "false",
-            "amount_cents": request.data.get('amount_cents', 10000),  # Default amount for testing
+            "amount_cents": int(amount*100),  # Default amount for testing
             "currency": "EGP",
            # "merchant_order_id": request.data.get('order_id', '12345'),  # Default order ID for testing
-            "items": []
+            "items": [
+                
+                {
+                     "name": "service",
+                     "amount_cents": int(amount*100),
+                     "description": "service",
+                     "quantity": 1
+                }
+                
+            ]
         })
+        
         if order_response.status_code != 201:
             return Response({"error": "Order creation failed"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -903,17 +1010,17 @@ class VodafoneCashPaymentAPIView(APIView):
         # Step 3: Payment Key
         payment_key_response = requests.post(settings.PAYMOB_PAYMENT_KEY_URL, json={
             "auth_token": auth_token,
-            "amount_cents": request.data.get('amount_cents', 10000),  # Default amount for testing
+            "amount_cents": int(amount*100),  # Default amount for testing
             "expiration": 3600,
             "order_id": order_id,
             "billing_data": {
                 "apartment": "803",  # Default apartment for testing
-                "email": "test@example.com",  # Default email for testing
+                "email": user.email,  # Default email for testing
                 "floor": "1",  # Default floor for testing
-                "first_name": "John",  # Default first name for testing
+                "first_name": user.username,  # Default first name for testing
                 "street": "Main St",  # Default street for testing
                 "building": "123",  # Default building for testing
-                "phone_number": "01010101010",  # Default phone number for testing
+                "phone_number": user.phone,  # Default phone number for testing
                 "shipping_method": "PKG",  # Default shipping method
                 "postal_code": "12345",  # Default postal code for testing
                 "city": "Cairo",  # Default city for testing

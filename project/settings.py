@@ -209,6 +209,8 @@ PAYMOB_API_KEY = 'ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3
 PAYMOB_INTEGRATION_ID = '4834160'
 PAYMOB_IFRAME_ID = '868664'
 PAYMOB_AUTH_URL = 'https://accept.paymobsolutions.com/api/auth/tokens'
+#PAYMOB_ORDER_URL='https://accept.paymob.com/api/v1/payment/'
+
 PAYMOB_ORDER_URL = 'https://accept.paymobsolutions.com/api/ecommerce/orders'
 PAYMOB_PAYMENT_KEY_URL = 'https://accept.paymobsolutions.com/api/acceptance/payment_keys'
 PAYMOB_IFRAME_URL = 'https://accept.paymobsolutions.com/api/acceptance/iframes/'
