@@ -194,7 +194,7 @@ class UpdateUserView(APIView):
     def put(self, request):
         try:
             user = Cuser.objects.get(email=request.user.email)  # Get the current user
-            serializer = CombinedCuserSerializer(user, data=request.data)  # Pass the user instance and data
+            serializer = CombinedCuserSerializer(user, data=request.data,partial=True)  # Pass the user instance and data
             
             if serializer.is_valid():  # Validate the data
                 serializer.save()  # Save the changes

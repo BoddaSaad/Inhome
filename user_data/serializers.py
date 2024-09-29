@@ -123,7 +123,7 @@ class Order_serviceserlizer(serializers.ModelSerializer):
 
 
 class CombinedCuserSerializer(serializers.ModelSerializer):
-    #new_phone = serializers.CharField(max_length=50, required=False)
+   
 
     class Meta:
         model = Cuser
