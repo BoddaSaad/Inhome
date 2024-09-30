@@ -247,8 +247,9 @@ class detal_service(APIView):
                 data = request.data
                 data['order'] = order.id
                 data['provider'] = provider.id
-                data['status'] = 'P'  
-                serializer = ServiceProviderOfferSerializer(data=data)
+                data['status'] = 'P' 
+                 
+                serializer = ServiceProviderOfferSerializer(data=data,partial=True)
                 if serializer.is_valid():
                     serializer.save()
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
