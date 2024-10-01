@@ -17,6 +17,7 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from rest_framework_simplejwt.views import TokenObtainPairView
 User = get_user_model()
 class SingViewSet(APIView):
     permission_classes = [AllowAny]
@@ -1041,3 +1042,9 @@ class VodafoneCashPaymentAPIView(APIView):
         payment_url = f"{settings.PAYMOB_IFRAME_URL}{settings.PAYMOB_IFRAME_ID}?payment_token={payment_token}"
 
         return Response({"payment_url": payment_url}, status=status.HTTP_200_OK)
+    
+    
+    
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

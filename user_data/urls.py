@@ -3,6 +3,8 @@ from .views import *
 
 urlpatterns = [
     path('sing_up/',SingViewSet.as_view(),name='sing'),
+    path('sign_in/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    
     path("active_provider/", Brovicevieset.as_view(), name="Brovicevieset"),
     #path('api/social-login/', SocialLoginView.as_view(), name='social-login'),
     path("UserDetailView/",UserDetailView.as_view(),name='UserDetailView'),
