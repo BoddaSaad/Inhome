@@ -402,3 +402,33 @@ class Offers(serializers.ModelSerializer):
         model=ServiceProviderOffer
         fields='__all__'
         
+        
+        
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # إضافة معلومات إضافية إلى التوكن
+        token['username'] = user.username
+        token['email'] = user.email
+
+        return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        
+        # إرجاع بيانات إضافية مع الاستجابة
+        data.update({
+            'user_id': self.user.id,
+            'username': self.user.username,
+            'email': self.user.email,
+            # أضف أي بيانات أخرى تحتاجها
+            'provider':self.user.Provides_services,
+            'request_user':self.user.request_services,
+            
+        })
+
+        return data

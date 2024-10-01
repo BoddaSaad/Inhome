@@ -43,7 +43,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('user_data.urls')) ,
-    path('sing_in', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    #path('sing_in', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),    
    # path('accounts/', include('allauth.urls')),
     path('api/token/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
