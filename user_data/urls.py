@@ -29,6 +29,7 @@ urlpatterns = [
 
     #all offer display offer to get on client
     path('all-offers/', All_offers.as_view(), name='all_offers'),
+    path("beast_offer/", beast_offers.as_view(), name="beast_offers"),
     #accept or refused order 
     path('offer_decision/<int:offer_id>/', OfferDecisionView.as_view(), name='offer_decision'),
     #get all offer accpet
