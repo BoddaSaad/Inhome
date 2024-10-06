@@ -157,6 +157,7 @@ class Orderservicevieset(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+  
     def post(self, request, id):
     
         if request.user.Provides_services==True:
@@ -168,7 +169,6 @@ class Orderservicevieset(APIView):
             try:
                 service = Services.objects.get(id=id)
                 user = request.user
-
                 # نسخ البيانات وتحديث الحقول المطلوبة
                 data = request.data.copy()
                 data['user'] = user.id
@@ -185,9 +185,6 @@ class Orderservicevieset(APIView):
                 return Response({"error": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-    
 
 class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated]
@@ -292,6 +289,29 @@ class All_offers(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class beast_offers(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # تصفية العروض بناءً على المستخدم الحالي
+            offers = ServiceProviderOffer.objects.filter(order__user=request.user.id).exclude(status='R').order_by('price')[:3]
+            serializer = OfferPriceSerializer(offers, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
+
 
 
 class OfferDecisionView(APIView):
