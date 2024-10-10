@@ -598,7 +598,8 @@ class CancelOrderView(APIView):
 
         else:
             return Response({'eroor':'not allow for you'},status=status.HTTP_202_ACCEPTED)
-        
+
+     
 class Notfi_client(APIView):
     def get(self,request):
         if request.user.Provides_services==True:
@@ -617,8 +618,7 @@ class Notfi_client(APIView):
             return Response(
                 "not allow for you"
             )
-        
-        
+                    
         try:
             notif = notfications_client.objects.get(id=notif_id, user=request.user)
             notif.delete()
@@ -627,7 +627,6 @@ class Notfi_client(APIView):
             return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class Get_compleata_for_provider(APIView):
     

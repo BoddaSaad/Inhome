@@ -55,7 +55,6 @@ urlpatterns = [
     #################################################################################################################################
     
     
-    
     path("compleat/<int:offer_id>/", Completa_proceser.as_view(), name="completa"),
     # get compleat servicer for provider
     path("Completa_proceser_client/<int:offer_id>/", Completa_proceser_client.as_view(), name="Completa_proceser_client"),
