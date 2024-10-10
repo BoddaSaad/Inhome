@@ -66,6 +66,8 @@ urlpatterns = [
     
     #path('service-provider-offers/', ServiceProviderOfferListView.as_view(), name='service-provider-offers-list'),
     #path('update_offer_price/<int:offer_id>/', UpdateOfferPriceView.as_view(), name='update_offer_price'),
+    path("notfications_provider/delete/<int:notif_id>/", Notifications.as_view(), name="delete_notification_provider"),
+    path("notfications_client/delete/<int:notif_id>/", Notfi_client.as_view(), name="delete_notification_client"),
     path("notfications_provider/", Notifications.as_view(), name="Notifications"),
     path("notfications_client/", Notfi_client.as_view(), name="Notfi_client"),
     path('vodafone-cash-payment/', VodafoneCashPaymentAPIView.as_view(), name='vodafone-cash-payment'),
