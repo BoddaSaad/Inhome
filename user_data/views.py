@@ -540,7 +540,20 @@ class Notifications(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+    def delete(self, request, notif_id):
+        if request.user.Provides_services==False:
+            return Response(
+                "not allow for you"
+            )
+        
+        try:
+            notif = Notfications_Broviders.objects.get(id=notif_id, brovider=request.user)
+            notif.delete()
+            return Response({"message": "Notification deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Notfications_Broviders.DoesNotExist:
+            return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -599,6 +612,22 @@ class Notfi_client(APIView):
         except Exception as e:
             return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
         
+    def delete(self, request, notif_id):
+        if request.user.Provides_services==True:
+            return Response(
+                "not allow for you"
+            )
+        
+        
+        try:
+            notif = notfications_client.objects.get(id=notif_id, user=request.user)
+            notif.delete()
+            return Response({"message": "Notification deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except notfications_client.DoesNotExist:
+            return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class Get_compleata_for_provider(APIView):
     
