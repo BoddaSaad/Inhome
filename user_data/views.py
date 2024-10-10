@@ -549,7 +549,7 @@ class Notifications(APIView):
         try:
             notif = Notfications_Broviders.objects.get(id=notif_id, brovider=request.user)
             notif.delete()
-            return Response({"message": "Notification deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"message": "Notification deleted successfully"}, status=status.HTTP_201_CREATED)
         except Notfications_Broviders.DoesNotExist:
             return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -608,7 +608,7 @@ class Notfi_client(APIView):
         try:
             notif=notfications_client.objects.filter(user=request.user.id)
             serializer=NotificationSerializer_clent(notif,many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
         
@@ -622,7 +622,7 @@ class Notfi_client(APIView):
         try:
             notif = notfications_client.objects.get(id=notif_id, user=request.user)
             notif.delete()
-            return Response({"message": "Notification deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"message": "Notification deleted successfully"}, status=status.HTTP_201_CREATED)
         except notfications_client.DoesNotExist:
             return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
