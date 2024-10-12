@@ -259,12 +259,12 @@ class GET_orders(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceProviderOffer
-        fields = ['order', 'status', 'order_details']
+        fields = ['id','order', 'status', 'order_details']
 
     def get_order_details(self, obj):
         order = obj.order
         return {
-
+        
             "service": order.service.name,
             "user": order.user.username,
             "type_service": order.type_service,
