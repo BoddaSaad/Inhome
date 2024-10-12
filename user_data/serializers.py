@@ -329,7 +329,7 @@ class CompleatService(serializers.ModelSerializer):
         fields = '__all__'
 
 
-    def id_provider(self,obj):
+    def get_id_provider(self,obj):
         return obj.provider.id
     
     def get_image(self,obj):
