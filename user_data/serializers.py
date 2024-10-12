@@ -9,6 +9,8 @@ from rest_framework.exceptions import ValidationError
 
 class SingUpSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
+    username = serializers.CharField(validators=[])
+    
 
     class Meta:
         model = Cuser
@@ -23,10 +25,6 @@ class SingUpSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         if Cuser.objects.filter(email=value).exists():
             raise serializers.ValidationError('This email is already in use')
-        return value
-
-    def validate_username(self, value):
-        # يمكنك إزالة هذا الشرط إذا كنت تريد قبول أي اسم مستخدم
         return value
 
 
