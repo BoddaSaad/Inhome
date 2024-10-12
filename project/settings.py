@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'social_django',
     'django_crontab',
+    'admin_material',
+    'admin_material.admin',
     
 ]
 
