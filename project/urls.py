@@ -42,7 +42,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('admin-material/', include('admin_material.admin.urls')),
+    path('', include('admin_material.urls')),
     path('',include('user_data.urls')) ,
     #path('sing_in', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),    
