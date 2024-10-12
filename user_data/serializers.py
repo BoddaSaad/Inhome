@@ -153,7 +153,7 @@ class ServiceProviderOfferSerializer(serializers.ModelSerializer):
 class ServiceProviderOfferSerializer_put(serializers.ModelSerializer):
     class Meta:
         model = ServiceProviderOffer
-        fields = ['order', 'provider', 'price', 'time_arrive', 'created_at']
+        fields = ['order', 'provider', 'price', 'time_arrive', 'created_at','status']
         read_only_fields = ['created_at']
 
 
