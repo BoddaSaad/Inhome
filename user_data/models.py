@@ -8,7 +8,7 @@ class Cuser(AbstractUser):
         ("E", "English"),
     ]
 
-    email = models.EmailField(unique=True)
+    email = models.CharField(unique=True)
     Provides_services = models.BooleanField(default=False)
     request_services = models.BooleanField(default=True)
     phone = models.CharField(max_length=50)
