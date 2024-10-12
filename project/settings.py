@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    'admin_material.apps.AdminMaterialDashboardConfig',
+   # 'admin_material.apps.AdminMaterialDashboardConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,8 +47,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'social_django',
     'django_crontab',
-   
-    
+    'admin_material',
+    'admin_material.admin',
 ]
 
 MIDDLEWARE = [
