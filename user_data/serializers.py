@@ -323,12 +323,17 @@ class CompleatService(serializers.ModelSerializer):
     provider=serializers.SerializerMethodField()
     image=serializers.SerializerMethodField()
     id_provider=serializers.SerializerMethodField()
+    user=serializers.SerializerMethodField()
     
     class Meta:
         model = ServiceProviderOffer  # Corrected from 'models'
         fields = '__all__'
 
 
+    def get_user(self,obj):
+        return obj.order.user.id
+    
+    
     def get_id_provider(self,obj):
         return obj.provider.id
     
