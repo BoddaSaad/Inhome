@@ -25,6 +25,12 @@ class SingUpSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('This email is already in use')
         return value
 
+    def validate_username(self, value):
+        # يمكنك إزالة هذا الشرط إذا كنت تريد قبول أي اسم مستخدم
+        return value
+
+
+
     def create(self, validated_data):
         validated_data.pop('password2')
         user = Cuser.objects.create(
