@@ -17,7 +17,7 @@ class SingUpSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError("Passwords do not match")
-        validate_password(attrs['password'])
+        #validate_password(attrs['password'])
         return attrs
 
     def validate_email(self, value):
