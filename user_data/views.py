@@ -339,6 +339,7 @@ class OfferDecisionView(APIView):
                     brovider=offer.provider,
                     title="تم تاكيد طلبك من جانب العميل ",
                     content='انقر للذهاب اللي صفحه الطلبات القادمه ',
+                    
 
 
                 )
@@ -351,9 +352,11 @@ class OfferDecisionView(APIView):
                     brovider=offer.provider,
                     title="تم رفض السعر من جانب العميل ",
                     content='انقر للذهاب لتحديد سعر جديد ',
+                    id_offer=offer_id
 
 
                 )
+    
 
 
 

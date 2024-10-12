@@ -141,6 +141,8 @@ class Notfications_Broviders(models.Model):
     title = models.CharField(max_length=300)
     content = models.CharField(max_length=500)
     brovider = models.ForeignKey(Cuser, on_delete=models.CASCADE)
+    id_offer=models.IntegerField(default=0)
+    
     def __str__(self) -> str:
         return self.title
 
