@@ -267,6 +267,7 @@ class GET_orders(serializers.ModelSerializer):
         
             "service": order.service.name,
             "user": order.user.username,
+            "id_user":order.user.id,
             "type_service": order.type_service,
             "time": order.time,
             "location": order.location,
