@@ -62,7 +62,7 @@ urlpatterns = [
     path("Get_compleata_for_provider/",Get_compleata_for_provider.as_view()),
     #get compleat servicer for client
     path("Get_compleata_for_client/", Get_compleata_for_client.as_view(), name="Get_compleata_for_client"),
-    
+    path('orders/filter-by-location/', FilterOrdersByProviderLocationView.as_view(), name='filter-orders-by-location'),
     #path('service-provider-offers/', ServiceProviderOfferListView.as_view(), name='service-provider-offers-list'),
     #path('update_offer_price/<int:offer_id>/', UpdateOfferPriceView.as_view(), name='update_offer_price'),
     path("notfications_provider/delete/<int:notif_id>/", Notifications.as_view(), name="delete_notification_provider"),
