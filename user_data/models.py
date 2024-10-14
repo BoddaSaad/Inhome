@@ -106,6 +106,17 @@ class Order_service(models.Model):
     file = models.FileField(upload_to='media/' ,null=True)
     descrtion=models.TextField()
     count = models.PositiveIntegerField(default=1)
+    status_choices = [
+        
+        ('P', 'Pending'),
+        ('Complete','Complete')
+        
+    ]
+    status=models.CharField(max_length=100,choices=status_choices,default='p')
+    
+    
+    
+    
     def __str__(self) -> str:
         return self.type_service
 

@@ -18,6 +18,53 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+import math
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    R = 6371  # نصف قطر الأرض بالكيلومتر
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+    
+    a = math.sin(delta_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    
+    distance = R * c  # النتيجة بالكيلومتر
+    return distance
+
+
+class FilterOrdersByProviderLocationView(APIView):
+    def get(self, request):
+        # الحصول على إحداثيات مقدم الخدمة من الطلب
+        provider_lat = request.query_params.get('latitude')
+        provider_lon = request.query_params.get('longitude')
+        radius = float(request.query_params.get('radius', 10))  # افتراضيًا نطاق البحث هو 10 كيلومترات
+
+        if provider_lat and provider_lon:
+            provider_lat = float(provider_lat)
+            provider_lon = float(provider_lon)
+            orders = Order_service.objects.filter(status='P')
+            filtered_orders = []
+            
+
+            # فلترة الأوامر بناءً على المسافة المحسوبة
+            for order in orders:
+                distance = haversine_distance(provider_lat, provider_lon, order.latitude, order.longitude)
+                if distance <= radius:
+                    filtered_orders.append(order)
+
+            serializer = Order_serviceserlizer(filtered_orders, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response({"error": "Please provide latitude and longitude"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
 User = get_user_model()
 class SingViewSet(APIView):
     permission_classes = [AllowAny]
@@ -214,7 +261,7 @@ class Offered_services(APIView):
             })
         if request.user.Provides_services==True:
             try:
-                offer=Order_service.objects.all()
+                offer=Order_service.objects.filter(status='P')
                 serializer=Order_serviceserlizer(offer,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
@@ -779,6 +826,7 @@ class Completa_proceser(APIView):
             try:
                 # الحصول على العرض والتحقق من وجوده
                 offer = ServiceProviderOffer.objects.get(id=offer_id)
+                order = offer.order
                 
                 # التحقق مما إذا كان العرض مكتمل بالفعل
                 if offer.status == "Complete":
@@ -786,7 +834,10 @@ class Completa_proceser(APIView):
                 
                 # تحديث حالة العرض إلى "Complete"
                 offer.status = 'Complete'
+                order.status = 'Complete'
                 offer.save()
+                order.save()
+                
                 
                 # تحديث مديونية مقدم الخدمة
                 provider = Brovides_services.objects.get(user=request.user)
@@ -817,6 +868,7 @@ class Completa_proceser_client(APIView):
             try:
                 # الحصول على العرض والتحقق من وجوده
                 offer = ServiceProviderOffer.objects.get(id=offer_id)
+                order = offer.order
                 
                 # التحقق مما إذا كان العرض مكتمل بالفعل
                 if offer.status == 'Complete':
@@ -824,7 +876,10 @@ class Completa_proceser_client(APIView):
                 
                 # تحديث حالة العرض إلى "Complete"
                 offer.status = 'Complete'
+                order.status = 'Complete'
                 offer.save()
+                order.save()
+                
                 
                 provider = Brovides_services.objects.get(user=offer.provider)
                 price_offer = int(offer.price)
