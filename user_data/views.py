@@ -261,7 +261,7 @@ class Offered_services(APIView):
             })
         if request.user.Provides_services==True:
             try:
-                offer=Order_service.objects.filter(status='P')
+                offer=Order_service.objects.filter(status__iexact='P')
                 serializer=Order_serviceserlizer(offer,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
