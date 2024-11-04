@@ -191,10 +191,11 @@ EMAIL_HOST_USER = "bentagwy2121@gmail.com"
 EMAIL_HOST_PASSWORD = "llux mtlk fvot yekd" 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',  # معرف فريد لذاكرة التخزين المؤقتة
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
     }
 }
+
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
