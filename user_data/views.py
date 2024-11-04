@@ -6,6 +6,7 @@ from .serializers import SingUpSerializer
 from .models import *
 from .serializers import *
 import random
+import time
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
@@ -142,12 +143,19 @@ class CheckCodeView(APIView):
         email = request.data.get('email')
         code = request.data.get('code')
         
-        # التحقق من إدخال البريد الإلكتروني والكود
         if not email or not code:
             return Response({"error": "Email and code are required."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # الحصول على الكود المخزن من الذاكرة المؤقتة
-        stored_code = cache.get(f'reset_code_{email}')
+        # المحاولة لجلب الكود من الذاكرة المؤقتة
+        stored_code = None
+        max_attempts = 3  # عدد المحاولات القصوى
+        attempt = 0
+        
+        while attempt < max_attempts and not stored_code:
+            stored_code = cache.get(f'reset_code_{email}')
+            attempt += 1
+            if not stored_code:
+                time.sleep(0.1)  # انتظار 100 ميلي ثانية قبل المحاولة مرة أخرى
         
         # التحقق من صحة الكود
         if stored_code is None:
@@ -156,8 +164,6 @@ class CheckCodeView(APIView):
             return Response({"message": "Code is valid."}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Invalid code."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        
         
 class Change_passviwe(APIView):
     permission_classes = [AllowAny]
