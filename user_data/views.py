@@ -102,45 +102,62 @@ class Brovicevieset(APIView):
 
 
 def generate_random_code(length=6):
-    code = ''.join(random.choices('0123456789', k=length))
-    return code
-    
+    return ''.join(random.choices('0123456789', k=length))
+
+# واجهة إرسال كود إعادة تعيين كلمة المرور
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
+        
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            user = User.objects.get(email=email)  # الحصول على المستخدم بناءً على البريد الإلكتروني
-            code = generate_random_code()  # توليد رمز عشوائي
+            
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            
+            # توليد الكود وتخزينه في الذاكرة المؤقتة
+            code = generate_random_code()
             cache.set(f'reset_code_{email}', code, timeout=600)
+            
+            # إرسال رسالة البريد الإلكتروني
             subject = 'Reset Password'
             message = f'Hi {user.first_name}, your reset code is {code}'
             email_from = settings.EMAIL_HOST_USER
             recipient_list = [email]
             
             send_mail(subject, message, email_from, recipient_list)
-            
-            return Response({"message": "Reset code sent"}, status=status.HTTP_200_OK)
+            return Response({"message": "Reset code sent successfully."}, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# واجهة التحقق من كود إعادة تعيين كلمة المرور
 class CheckCodeView(APIView):
     permission_classes = [AllowAny]
+    
     def post(self, request):
         email = request.data.get('email')
         code = request.data.get('code')
+        
+        # التحقق من إدخال البريد الإلكتروني والكود
         if not email or not code:
-            return Response({"error": "Email and code are required"}, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Response({"error": "Email and code are required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # الحصول على الكود المخزن من الذاكرة المؤقتة
         stored_code = cache.get(f'reset_code_{email}')
         
-        if stored_code == code:
-            return Response({"message": "Code is valid"}, status=status.HTTP_200_OK)
+        # التحقق من صحة الكود
+        if stored_code is None:
+            return Response({"error": "No code found or code expired."}, status=status.HTTP_404_NOT_FOUND)
+        elif stored_code == code:
+            return Response({"message": "Code is valid."}, status=status.HTTP_200_OK)
         else:
-            return Response({"error": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid code."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
         
 class Change_passviwe(APIView):
     permission_classes = [AllowAny]
