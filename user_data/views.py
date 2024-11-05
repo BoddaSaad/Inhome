@@ -87,6 +87,7 @@ class UserDetailView(APIView):
 
 ##
 class Brovicevieset(APIView):
+    permission_classes=[AllowAny]
     def post(self, request):
         try:
             data = request.data
