@@ -285,7 +285,7 @@ class Offered_services(APIView):
             })
         if request.user.Provides_services==True:
             try:
-                provider=Brovides_services.objects.get(id=request.user.id)
+                provider=Brovides_services.objects.get(user=request.user)
                 offer=Order_service.objects.filter(status__iexact='P' ,service=provider.service)
                 serializer=Order_serviceserlizer(offer,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
