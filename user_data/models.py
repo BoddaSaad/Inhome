@@ -26,7 +26,7 @@ class Cuser(AbstractUser):
     
 
 class Services(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=500)
     photo = models.ImageField(upload_to=None)
     detal = models.TextField()
     def __str__(self) -> str:

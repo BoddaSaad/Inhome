@@ -448,3 +448,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         })
 
         return data
+
+
+
+class Services_selizer(serializers.ModelSerializer):
+    
+    class Meta:
+        model=Services
+        fields=['id','name']
+        
+        
+        
