@@ -1184,8 +1184,12 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class All_Service_in_app(ListAPIView):
+    permission_classes = [AllowAny]
     queryset = Services.objects.all()
     serializer_class = Services_selizer
     
     
+    
+
+
     
