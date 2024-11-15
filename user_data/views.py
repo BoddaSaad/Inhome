@@ -19,7 +19,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from rest_framework_simplejwt.views import TokenObtainPairView
-
+from rest_framework.generics import ListAPIView
 import math
 
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -285,7 +285,8 @@ class Offered_services(APIView):
             })
         if request.user.Provides_services==True:
             try:
-                offer=Order_service.objects.filter(status__iexact='P')
+                provider=Brovides_services.objects.get(id=request.user.id)
+                offer=Order_service.objects.filter(status__iexact='P' ,service=provider.service)
                 serializer=Order_serviceserlizer(offer,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
@@ -1178,3 +1179,13 @@ class VodafoneCashPaymentAPIView(APIView):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    
+    
+
+
+class All_Service_in_app(ListAPIView):
+    queryset = Services.objects.all()
+    serializer_class = Services_selizer
+    
+    
+    
