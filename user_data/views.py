@@ -1212,8 +1212,8 @@ class Rufesd_order_provider(APIView):
             
             
             order_refused=Refused_order_from_provider.objects.create(
-                provider,
-                order,
+                provider=provider,
+                order=order,
                                 
             )
             return Response({"done":"done"},status=status.HTTP_201_CREATED)
