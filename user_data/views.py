@@ -286,7 +286,8 @@ class Offered_services(APIView):
         if request.user.Provides_services==True:
             try:
                 provider=Brovides_services.objects.get(user=request.user)
-                offer=Order_service.objects.filter(status__iexact='P' ,service=provider.service)
+                refused_orders = Refused_order_from_provider.objects.filter(provider=provider).values_list('order', flat=True)
+                offer=Order_service.objects.filter(status__iexact='P' ,service=provider.service).exclude(id__in=refused_orders)
                 serializer=Order_serviceserlizer(offer,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
@@ -1191,5 +1192,28 @@ class All_Service_in_app(ListAPIView):
     
     
 
-
-    
+class Rufesd_order_provider(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self,request):
+        order_id=request.data.get('order')
+        user=request.user
+        if user.Provides_services == False:
+            return Response({"not allow for you":" not allow for you"} ,status=status.HTTP_400_BAD_REQUEST)
+        if not order_id:
+            return Response({"where is a order ":" ???"},status=status.HTTP_400_BAD_REQUEST)
+        else:
+            order=Order_service.objects.get(id=order_id)
+            provider=Brovides_services.objects.get(user=user)
+            
+            
+            order_refused=Refused_order_from_provider.objects.create(
+                provider,
+                order,
+                                
+            )
+            return Response({"done":"done"},status=status.HTTP_201_CREATED)
+            
+            
+            
+            
+                
