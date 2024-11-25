@@ -16,6 +16,8 @@ class Cuser(AbstractUser):
     location = models.CharField(max_length=500, null=True)
     lan = models.CharField(max_length=50, choices=select_lan, default='A')
     name = models.CharField(max_length=150)
+    latitude = models.CharField(max_length=250)
+    longitude=models.CharField(max_length=250)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # تغيير الحقل المطلوب هنا
@@ -167,3 +169,9 @@ class notfications_client(models.Model):
     
     def __str__(self) -> str:
         return self.title
+
+
+class Refused_order_from_provider(models.Model):
+    provider=models.ForeignKey(Brovides_services, on_delete=models.CASCADE)
+    order=models.ForeignKey(Order_service,on_delete=models.CASCADE)
+    

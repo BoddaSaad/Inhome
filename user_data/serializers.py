@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import validate_email as django_validate_email
 from .models import *
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -14,7 +15,7 @@ class SingUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cuser
-        fields = [ 'username', 'email', 'password', 'password2', 'phone', 'Provides_services', 'request_services']
+        fields = [ 'username', 'email', 'password', 'password2', 'phone', 'Provides_services', 'request_services' ,'latitude','longitude']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -40,6 +41,16 @@ class SingUpSerializer(serializers.ModelSerializer):
             password=make_password(validated_data['password']),
         )
         return user
+    
+    
+        
+    def to_representation(self, instance):
+        # إصدار التوكين
+        refresh = RefreshToken.for_user(instance)
+        data = super().to_representation(instance)
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+        return data
 
 class Brovice_data(serializers.ModelSerializer):
     class Meta:

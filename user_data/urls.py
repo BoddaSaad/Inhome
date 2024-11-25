@@ -70,6 +70,7 @@ urlpatterns = [
     path("notfications_provider/", Notifications.as_view(), name="Notifications"),
     path("notfications_client/", Notfi_client.as_view(), name="Notfi_client"),
     path('vodafone-cash-payment/', VodafoneCashPaymentAPIView.as_view(), name='vodafone-cash-payment'),
-    
+    #refused order from provider
+    path("refused_order_provider/", Rufesd_order_provider.as_view(),name="refused_order_provider")  ,
   
 ]
