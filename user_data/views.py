@@ -375,7 +375,7 @@ class beast_offers(APIView):
     def get(self, request):
         try:
             # تصفية العروض بناءً على المستخدم الحالي
-            offers = ServiceProviderOffer.objects.filter(order__user=request.user.id).exclude(status='R').order_by('price')
+            offers = ServiceProviderOffer.objects.filter(order__user=request.user.id).exclude(status__in=['R', 'completed']).order_by('price')
             serializer = OfferPriceSerializer(offers, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
