@@ -114,6 +114,7 @@ class Order_service(models.Model):
         ('Complete','Complete')
         
     ]
+    created_at = models.DateTimeField(auto_now_add=True)
     status=models.CharField(max_length=100,choices=status_choices,default='p')
     
     
