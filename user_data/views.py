@@ -362,7 +362,7 @@ class All_offers(APIView):
     def get(self, request):
         try:
             # تصفية العروض بناءً على المستخدم الحالي
-            offers = ServiceProviderOffer.objects.filter(order__user=request.user.id).exclude(status='R')
+            offers = ServiceProviderOffer.objects.filter(order__user=request.user.id).exclude(status__in=['R', 'completed'])
             serializer = OfferPriceSerializer(offers, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
