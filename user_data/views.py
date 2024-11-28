@@ -292,7 +292,7 @@ class Offered_services(APIView):
             try:
                 provider=Brovides_services.objects.get(user=request.user)
                 refused_orders = Refused_order_from_provider.objects.filter(provider=provider).values_list('order', flat=True)
-                offer=Order_service.objects.filter(status__iexact='P' ,service=provider.service).exclude(id__in=refused_orders)
+                offer=Order_service.objects.filter(status__iexact='P' ,service=provider.service).exclude(id__in=refused_orders).order_by('-created_at')
                 serializer=Order_serviceserlizer(offer,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
@@ -647,11 +647,10 @@ class CancelOrderView(APIView):
         if request.user.Provides_services==True:
             try:
                 # الحصول على الطلب (Order) بناءً على معرف الطلب
-                #order = get_object_or_404(Order_service, id=order_id)
-                
+                #order = get_object_or_404(Order_service, id=order_id) 
                 # التحقق من أن المستخدم الذي يقوم بالطلب هو مقدم الخدمة المرتبط بالطلب
-                provider_offer = ServiceProviderOffer.objects.filter(id=order_id, provider=request.user).first()
                 
+                provider_offer = ServiceProviderOffer.objects.filter(id=order_id, provider=request.user).first()
                 if not provider_offer:
                     return Response({"error": "You are not authorized to cancel this order."}, status=status.HTTP_403_FORBIDDEN)
                 
