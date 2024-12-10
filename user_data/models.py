@@ -31,6 +31,8 @@ class Services(models.Model):
     name = models.CharField(max_length=500)
     photo = models.ImageField(upload_to=None)
     detal = models.TextField()
+    name_english=models.CharField(max_length=500,null=True)
+    detal_by_english=models.TextField(null=True)
     def __str__(self) -> str:
         return self.name
 
