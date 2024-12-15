@@ -200,7 +200,20 @@ class Serviceviewset(APIView):
             else:
                 service = Services.objects.all()
             serializer = Serviceserleszer(service, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            if getattr(request.user, 'lan', None) == 'A':  # Check for language attribute
+                data = [
+                    {'name': item['name'], 'photo': item['photo'], 'detail': item['detail']}
+                    for item in serializer
+                ]
+            elif getattr(request.user, 'lan', None) == 'E': 
+                data = [
+                    {'name_english': item['name_english'], 'photo': item['photo'], 'detail_by_english': item['detail_by_english']}
+                    for item in serializer
+                ]
+            else:
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            # Return the filtered data
+            return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
