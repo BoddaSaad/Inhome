@@ -213,7 +213,10 @@ class OfferPriceSerializer(serializers.ModelSerializer):
     def get_service_name(self, obj):
         try:
             brovide_service = Brovides_services.objects.get(user=obj.provider)
-            return brovide_service.service.name
+            if getattr(obj.provider,'lan',None)=='A':
+                return brovide_service.service.name
+            else:
+                return brovide_service.service.name_english
         except Brovides_services.DoesNotExist:
             return None
 
@@ -278,9 +281,14 @@ class GET_orders(serializers.ModelSerializer):
 
     def get_order_details(self, obj):
         order = obj.order
+        user_language = getattr(order.user, 'lan', 'A')
+        if user_language=='A':
+            name_service=order.service.name
+        else:
+            name_service =order.service.name_english 
         return {
         
-            "service": order.service.name,
+            "service": name_service,
             "user": order.user.username,
             "id_user":order.user.id,
             "type_service": order.type_service,
@@ -372,7 +380,15 @@ class CompleatService(serializers.ModelSerializer):
         return price
 
     def get_service(self, obj):
-        service = obj.order.service.name  # Fixed typo
+        
+        order = obj.order
+        user_language = getattr(order.user, 'lan', 'A')
+        if user_language=='A':
+            name_service=order.service.name
+        else:
+            name_service =order.service.name_english 
+    
+        service = name_service  
         return service
 
     def get_created_at(self, obj):

@@ -47,6 +47,9 @@ class Brovides_services(models.Model):
     debt_cleared_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    def __str__(self):
+        return self.user.username
+    
     
     
     
@@ -177,4 +180,3 @@ class notfications_client(models.Model):
 class Refused_order_from_provider(models.Model):
     provider=models.ForeignKey(Brovides_services, on_delete=models.CASCADE)
     order=models.ForeignKey(Order_service,on_delete=models.CASCADE)
-    
