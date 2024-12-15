@@ -202,12 +202,12 @@ class Serviceviewset(APIView):
             serializer = Serviceserleszer(service, many=True)
             if getattr(request.user, 'lan', None) == 'A':  # Check for language attribute
                 data = [
-                    {'name': item['name'], 'photo': item['photo'], 'detal': item['detal']}
+                    {'id':item['id'],'name': item['name'], 'photo': item['photo'], 'detal': item['detal']}
                     for item in serializer.data
                 ]
             elif getattr(request.user, 'lan', None) == 'E': 
                 data = [
-                    {'name': item['name_english'], 'photo': item['photo'], 'detal': item['detal_by_english']}
+                    {'id':item['id'],'name': item['name_english'], 'photo': item['photo'], 'detal': item['detal_by_english']}
                     for item in serializer.data
                 ]
             else:
