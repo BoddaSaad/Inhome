@@ -207,7 +207,7 @@ class Serviceviewset(APIView):
                 ]
             elif getattr(request.user, 'lan', None) == 'E': 
                 data = [
-                    {'name_english': item['name_english'], 'photo': item['photo'], 'detal_by_english': item['detal_by_english']}
+                    {'name': item['name_english'], 'photo': item['photo'], 'detal': item['detal_by_english']}
                     for item in serializer.data
                 ]
             else:
