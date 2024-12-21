@@ -7,7 +7,7 @@ class Cuser(AbstractUser):
         ("A", "Arabic"),
         ("E", "English"),
     ]
-
+    username=models.CharField(max_length=400,unique=False)
     email = models.CharField(max_length=400,unique=True)
     Provides_services = models.BooleanField(default=False)
     request_services = models.BooleanField(default=True)
