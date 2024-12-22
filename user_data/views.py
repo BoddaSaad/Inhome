@@ -240,7 +240,32 @@ class Orderservicevieset(APIView):
         try:
             service = Services.objects.get(id=id)
             serializer = Serviceserleszer(service)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            if request.user:
+                if request.user.lan=='A':
+                
+                    data={
+                        "id":serializer.data['id'],
+                        "name": serializer.data['name'],
+                        "photo":serializer.data['photo'],
+                        "detal":serializer.data['detal']
+                        
+                    }
+                   # return Response(data, status=status.HTTP_200_OK)
+                else:
+                      
+                    data={
+                        "id":serializer.data['id'],
+                        "name": serializer.data['name_english'],
+                        "photo":serializer.data['photo'],
+                        "detal":serializer.data['detal_by_english']
+                        
+                    }
+                  #  return Response(data,status=status.HTTP_200_OK)
+            else:
+                data= serializer.data
+            
+            
+            return Response(data, status=status.HTTP_200_OK)
         except Services.DoesNotExist:
             return Response({"error": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
