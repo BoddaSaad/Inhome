@@ -240,7 +240,7 @@ class Orderservicevieset(APIView):
         try:
             service = Services.objects.get(id=id)
             serializer = Serviceserleszer(service)
-            if request.user:
+            if request.user.is_authenticated:
                 if request.user.lan=='A':
                 
                     data={
