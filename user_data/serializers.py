@@ -461,6 +461,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
+        if 'email' in attrs:
+            attrs['email'] = attrs['email'].lower()
         data = super().validate(attrs)
         
         # إرجاع بيانات إضافية مع الاستجابة

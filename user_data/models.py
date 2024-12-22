@@ -24,8 +24,9 @@ class Cuser(AbstractUser):
 
     def __str__(self):
         return self.email
-
-    
+    def save(self, *args, **kwargs):
+        self.email = self.email.lower()
+        super().save(*args, **kwargs)
 
 class Services(models.Model):
     name = models.CharField(max_length=500)
