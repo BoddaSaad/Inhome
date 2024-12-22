@@ -24,6 +24,7 @@ class SingUpSerializer(serializers.ModelSerializer):
         return attrs
 
     def validate_email(self, value):
+        value=value.lower()
         if Cuser.objects.filter(email=value).exists():
             raise serializers.ValidationError('This email is already in use')
         return value
