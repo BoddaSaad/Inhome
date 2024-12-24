@@ -401,19 +401,13 @@ class CompleatService(serializers.ModelSerializer):
         
     def get_rating_cilent(self, obj):
         user_id = obj.order.user.id
-        try:
-            rate = ClientRating.objects.filter(client__id=user_id).aggregate(average=Avg('rating'))
-            return rate['rating']
-        except ClientRating.DoesNotExist:
-            return 4  
-        
-    def get_rating_provider(self,obj):
+        rate = ClientRating.objects.filter(client__id=user_id).aggregate(average=Avg('rating'))
+        return rate['average'] or 0  # إذا لم تكن هناك تقييمات، يرجع 0
+
+    def get_rating_provider(self, obj):
         user_id = obj.provider.id
-        try:
-            rate = Rating.objects.filter(service_provider__user__id=user_id).aggregate(average=Avg('rating'))
-            return rate['rating']
-        except Rating.DoesNotExist:
-            return 4  
+        rate = Rating.objects.filter(service_provider__user__id=user_id).aggregate(average=Avg('rating'))
+        return rate['average'] or 0
         
 # class CompleatServiceWithProvider(CompleatService):
 #     provider_name = serializers.SerializerMethodField()
