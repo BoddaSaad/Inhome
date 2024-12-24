@@ -186,11 +186,12 @@ class OfferPriceSerializer(serializers.ModelSerializer):
     email=serializers.SerializerMethodField()
     phone=serializers.SerializerMethodField()
     id_provider=serializers.SerializerMethodField()
-    
+    rating=serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceProviderOffer
-        fields = fields = ['id', 'provider_name', 'provider_pic', 'time_arrive', 'price', 'comment', 'created_at', 'status', 'order', 'provider', 'service_name','email','phone','id_provider']
+        fields = fields = ['id', 'provider_name', 'provider_pic', 'time_arrive', 'price', 'comment', 'created_at', 'status', 'order', 'provider', 'service_name','email','phone','id_provider','rating']
+        
     def get_id_provider(slef,obj):
         id=obj.provider.id
         return id 
@@ -236,14 +237,11 @@ class OfferPriceSerializer(serializers.ModelSerializer):
             return brovide_service.user.email
         except Brovides_services.DoesNotExist:
             return None
-        
-    def get_average_rating(self, obj):
-        try:
-            brovide_service = Brovides_services.objects.get(user=obj.provider)
-            print(brovide_service.rating)
-            return brovide_service.rating
-        except Brovides_services.DoesNotExist:
-            return None
+    
+    def get_rating(self, obj):
+        user_id = obj.provider.id
+        rate = Rating.objects.filter(service_provider__user__id=user_id).aggregate(average=Avg('rating'))
+        return rate['average'] or 3
 
 
         
@@ -402,12 +400,12 @@ class CompleatService(serializers.ModelSerializer):
     def get_rating_cilent(self, obj):
         user_id = obj.order.user.id
         rate = ClientRating.objects.filter(client__id=user_id).aggregate(average=Avg('rating'))
-        return rate['average'] or 0  # إذا لم تكن هناك تقييمات، يرجع 0
+        return rate['average'] or 3  # إذا لم تكن هناك تقييمات، يرجع 0
 
     def get_rating_provider(self, obj):
         user_id = obj.provider.id
         rate = Rating.objects.filter(service_provider__user__id=user_id).aggregate(average=Avg('rating'))
-        return rate['average'] or 0
+        return rate['average'] or 3
         
 # class CompleatServiceWithProvider(CompleatService):
 #     provider_name = serializers.SerializerMethodField()
