@@ -82,17 +82,17 @@ class Brovides_services(models.Model):
 class Rating(models.Model):
     service_provider = models.ForeignKey(Brovides_services, on_delete=models.CASCADE, related_name="ratings")
     user = models.ForeignKey(Cuser, on_delete=models.CASCADE)
-    rating = models.PositiveIntegerField()  # قيمة التقييم (1-5)
+    rating = models.PositiveIntegerField(default=4)  # قيمة التقييم (1-5)
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('service_provider', 'user')  # كل مستخدم يمكنه تقييم مقدم الخدمة مرة واحدة فقط
-
+#client rating
 class ClientRating(models.Model):
     client = models.ForeignKey(Cuser, on_delete=models.CASCADE, related_name="client_ratings")
     provider = models.ForeignKey(Cuser, on_delete=models.CASCADE, related_name="provider_ratings")
-    rating = models.PositiveIntegerField()  # قيمة التقييم (1-5)
+    rating = models.PositiveIntegerField(default=4)  # قيمة التقييم (1-5)
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
