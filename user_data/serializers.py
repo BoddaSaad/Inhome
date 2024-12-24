@@ -5,6 +5,7 @@ from .models import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
+from django.db.models import Avg
 User = get_user_model()
 from rest_framework.exceptions import ValidationError
 
@@ -401,18 +402,18 @@ class CompleatService(serializers.ModelSerializer):
     def get_rating_cilent(self, obj):
         user_id = obj.order.user.id
         try:
-            rate = ClientRating.objects.get(client__id=user_id)
-            return rate.rating
+            rate = ClientRating.objects.filter(client__id=user_id).aggregate(average=Avg('rating'))
+            return rate['rating']
         except ClientRating.DoesNotExist:
-            return None  
+            return 4  
         
     def get_rating_provider(self,obj):
         user_id = obj.provider.id
         try:
-            rate = Rating.objects.get(service_provider__user__id=user_id)
-            return rate.rating
+            rate = Rating.objects.filter(service_provider__user__id=user_id).aggregate(average=Avg('rating'))
+            return rate['rating']
         except Rating.DoesNotExist:
-            return None  
+            return 4  
         
 # class CompleatServiceWithProvider(CompleatService):
 #     provider_name = serializers.SerializerMethodField()
