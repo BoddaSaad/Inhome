@@ -397,23 +397,23 @@ class CompleatService(serializers.ModelSerializer):
     def get_created_at(self, obj):
         return obj.created_at
     
-    
-def get_rating_cilent(self, obj):
-    user_id = obj.order.user.id
-    try:
-        rate = ClientRating.objects.get(client__id=user_id)
-        return rate.rating
-    except ClientRating.DoesNotExist:
-        return None  
-    
-def get_rating_provider(self,obj):
-    user_id = obj.provider.id
-    try:
-        rate = Rating.objects.get(service_provider__user__id=user_id)
-        return rate.rating
-    except Rating.DoesNotExist:
-        return None  
-    
+        
+    def get_rating_cilent(self, obj):
+        user_id = obj.order.user.id
+        try:
+            rate = ClientRating.objects.get(client__id=user_id)
+            return rate.rating
+        except ClientRating.DoesNotExist:
+            return None  
+        
+    def get_rating_provider(self,obj):
+        user_id = obj.provider.id
+        try:
+            rate = Rating.objects.get(service_provider__user__id=user_id)
+            return rate.rating
+        except Rating.DoesNotExist:
+            return None  
+        
 # class CompleatServiceWithProvider(CompleatService):
 #     provider_name = serializers.SerializerMethodField()
 
