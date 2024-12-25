@@ -117,6 +117,7 @@ class Order_service(models.Model):
     status_choices = [
         
         ('P', 'Pending'),
+        ('offer','offer'),
         ('Complete','Complete')
         
     ]
