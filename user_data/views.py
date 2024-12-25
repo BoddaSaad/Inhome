@@ -362,6 +362,7 @@ class detal_service(APIView):
                 data['order'] = order.id
                 data['provider'] = provider.id
                 data['status'] = 'offer' 
+                
                  
                 serializer = ServiceProviderOfferSerializer(data=data,partial=True)
                 if serializer.is_valid():
