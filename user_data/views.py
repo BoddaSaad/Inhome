@@ -361,7 +361,7 @@ class detal_service(APIView):
                 data = request.data
                 data['order'] = order.id
                 data['provider'] = provider.id
-                data['status'] = 'offer' 
+                order.status = 'offer' 
                 order.save()
                 
                 serializer = ServiceProviderOfferSerializer(data=data,partial=True)
