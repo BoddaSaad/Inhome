@@ -355,11 +355,12 @@ class Offered_services(APIView):
             })
         if request.user.Provides_services==True:
             try:
+                provider=Brovides_services.objects.get(user=request.user)
                 excluded_orders = Send_offer_from_provider.objects.filter(
                     provider=provider
                 ).values_list('order_id', flat=True)
                 
-                provider=Brovides_services.objects.get(user=request.user)
+                
                 refused_orders = Refused_order_from_provider.objects.filter(provider=provider).values_list('order', flat=True)
                 offer = Order_service.objects.filter(
                         service=provider.service  
