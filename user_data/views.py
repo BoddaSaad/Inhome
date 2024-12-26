@@ -973,7 +973,9 @@ class Completa_proceser(APIView):
                 Notfications_Broviders.objects.create(
                     title="الرجاء تسديد الرسوم المطلوبة",
                     content="اذهب هنا للمحفظة",
-                    brovider=request.user
+                    brovider=request.user ,
+                    title_english='Please pay the required fees',
+                    content_english='Go here to the wallet',
                 )
 
                 return Response(status=status.HTTP_200_OK)
@@ -1011,11 +1013,13 @@ class Completa_proceser_client(APIView):
                 provider.save()
 
                 
-                # إنشاء إشعار لمقدم الخدمة
                 Notfications_Broviders.objects.create(
                     title="الرجاء تسديد الرسوم المطلوبة",
                     content="اذهب هنا للمحفظة",
-                    brovider=provider.user
+                    brovider=provider.user,
+                    title_english='Please pay the required fees',
+                    content_english='Go here to the wallet',
+                    
                 )
                 
                 return Response({"done":"done"},status=status.HTTP_200_OK)
