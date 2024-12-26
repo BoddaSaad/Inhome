@@ -164,7 +164,11 @@ class Notfications_Broviders(models.Model):
     title = models.CharField(max_length=300)
     content = models.CharField(max_length=500)
     brovider = models.ForeignKey(Cuser, on_delete=models.CASCADE)
+    title_english=models.CharField(max_length=300)
+    content_english=models.CharField(max_length=500)
     id_offer=models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    seen=models.BooleanField(default=False)
     
     def __str__(self) -> str:
         return self.title
@@ -174,7 +178,10 @@ class notfications_client(models.Model):
     title = models.CharField(max_length=300)
     content = models.CharField(max_length=500)
     user = models.ForeignKey(Cuser, on_delete=models.CASCADE)
-    
+    title_english=models.CharField(max_length=300)
+    content_english=models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    seen=models.BooleanField(default=False)
     def __str__(self) -> str:
         return self.title
 

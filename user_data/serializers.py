@@ -326,16 +326,48 @@ class OfferUpdateSerializer(serializers.ModelSerializer):
 
 
 class Noticationserlizer(serializers.ModelSerializer):
+    
+    title = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
+    
     class Meta:
         model=Notfications_Broviders
-        fields="__all__"
+        fields = ['id', 'title', 'content', 'id_offer','brovider']
         
+    
+    def get_title(self, obj):
+        request = self.context.get('request')
+        if request and request.user.lan == 'E': 
+            return obj.title_english
+        return obj.title
+
+    def get_content(self, obj):
+        request = self.context.get('request')
+        if request and request.user.lan == 'E':
+            return obj.content_english
+        return obj.content
         
         
 class NotificationSerializer_clent(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
     class Meta:
         model = notfications_client
-        fields = '__all__'
+        fields = ['id', 'title', 'content', 'user']
+        
+    def get_title(self, obj):
+        request = self.context.get('request')
+        if request and request.user.lan == 'E':  
+            return obj.title_english
+        return obj.title
+
+    def get_content(self, obj):
+        request = self.context.get('request')
+        if request and request.user.lan == 'E':
+            return obj.content_english
+        return obj.content
+        
+    
         
         
 class CompleatService(serializers.ModelSerializer):
