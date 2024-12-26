@@ -189,3 +189,10 @@ class notfications_client(models.Model):
 class Refused_order_from_provider(models.Model):
     provider=models.ForeignKey(Brovides_services, on_delete=models.CASCADE)
     order=models.ForeignKey(Order_service,on_delete=models.CASCADE)
+
+
+
+class Send_offer_from_provider(models.Model):
+    provider=models.ForeignKey(Brovides_services, on_delete=models.CASCADE)
+    order=models.ForeignKey(Order_service,on_delete=models.CASCADE)
+    
