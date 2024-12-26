@@ -1013,7 +1013,6 @@ class Completa_proceser_client(APIView):
                 provider.save()
 
                 
-                # إنشاء إشعار لمقدم الخدمة
                 Notfications_Broviders.objects.create(
                     title="الرجاء تسديد الرسوم المطلوبة",
                     content="اذهب هنا للمحفظة",
