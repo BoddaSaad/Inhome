@@ -1,0 +1,4 @@
+
+ahmed=(1,2)
+ahmed=list(ahmed)
+print(ahmed)

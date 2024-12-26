@@ -90,7 +90,34 @@ class UserDetailView(APIView):
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-##
+class User_currency(APIView):
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+    def get(self,request):
+        if request.user.country=='مصر':
+            if request.user.lan=='A':
+                currency={
+                    "currency":'جنيه'
+                }
+            else:
+                currency={
+                    "currency":"pound"
+                }
+        elif request.user.country=='الكويت':
+              if request.user.lan=='A':
+                currency={
+                    "currency":'دينار'
+                }
+              else:
+                currency={
+                    "currency":"KWD"
+                }
+        return Response(currency,status=status.HTTP_200_OK)
+            
+
+
+
 class Brovicevieset(APIView):
     permission_classes=[AllowAny]
     def post(self, request):
@@ -455,12 +482,13 @@ class OfferDecisionView(APIView):
                 noteifcation=Notfications_Broviders.objects.create(
                     brovider=offer.provider,
                     title="تم تاكيد طلبك من جانب العميل ",
-                    content='انقر للذهاب اللي صفحه الطلبات القادمه ',
-                    
-
-
+                    content='انقر للذهاب اللي صفحه الطلبات القادمه ', 
+                    title_english="Your order has been confirmed by the client",
+                    content_english="Click to go to the upcoming orders page",
+                
+                
                 )
-
+                
                 return Response({"message": "Offer accepted."}, status=status.HTTP_200_OK)
             elif decision == 'reject':
                 offer.status = 'R'
@@ -469,13 +497,14 @@ class OfferDecisionView(APIView):
                     brovider=offer.provider,
                     title="تم رفض السعر من جانب العميل ",
                     content='انقر للذهاب لتحديد سعر جديد ',
-                    id_offer=offer_id
+                    id_offer=offer_id,
+                    title_english="The price has been rejected by the client",
+                    content_english="Click to set a new price",
+                
+                    
 
 
                 )
-    
-
-
 
                 return Response({"message": "Offer rejected."}, status=status.HTTP_200_OK)
             else:
@@ -520,9 +549,12 @@ class CancelServiceProviderOfferView(APIView):
                     brovider=offer.provider,
                     title="تم حذف المعاد القادم",
                     content='انقر للذهاب اللي صفحه الطلبات الملغيه ',
+                    title_english="The upcoming appointment has been canceled",
+                    content_english="Click to go to the canceled orders page",
+                
 
 
-                )
+                )   
                 return Response({"message": "Offer canceled."}, status=status.HTTP_200_OK)
             else:
                 return Response({"error": "Offer is already canceled."}, status=status.HTTP_400_BAD_REQUEST)
@@ -646,9 +678,11 @@ class Notifications(APIView):
             return Response(
                 "not allow for you"
             )
+            
         try:
             # جلب جميع الإشعارات المتعلقة بالمزود الذي قام بتسجيل الدخول
-            notifications = Notfications_Broviders.objects.filter(brovider=request.user.id)
+            notifications = Notfications_Broviders.objects.filter(brovider=request.user.id).order_by('-created_at')
+            notifications.update(seen=True)
             
             # تحويل البيانات باستخدام Serializer المناسب (يجب أن تكون قد قمت بإنشاء Serializer للإشعارات)
             serializer = Noticationserlizer(notifications, many=True)
@@ -702,9 +736,12 @@ class CancelOrderView(APIView):
                 
                 # إنشاء إشعار للعميل
                 notification = notfications_client.objects.create(
-                    title="Order Canceled",
-                    content=f"Your order for service '{provider_offer.order.service.name}' has been canceled by the provider.",
-                    user=provider_offer.order.user
+                    title="تم الغاء الطلب من قبل مقد الخدمه",
+                    content=f"طلبك لهذه الخدمه '{provider_offer.order.service.name}' تم الغائه",
+                    user=provider_offer.order.user,
+                    title_english="Your order has been confirmed by the client",
+                    content_english=f"Your order for service '{provider_offer.order.service.name_english}' has been canceled by the provider.",
+                
                 )
                 
                 # إرسال الإشعار (يمكنك تخصيص هذا بناءً على متطلباتك)
@@ -726,7 +763,8 @@ class Notfi_client(APIView):
                 "not allow for you"
             )
         try:
-            notif=notfications_client.objects.filter(user=request.user.id)
+            notif=notfications_client.objects.filter(user=request.user.id).order_by('-created_at')
+            notif.update(seen=True)
             serializer=NotificationSerializer_clent(notif,many=True)
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -746,6 +784,23 @@ class Notfi_client(APIView):
             return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class new_notfications(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self,request):
+        try:
+            notif=notfications_client.objects.filter(user=request.user.id,seen=False).order_by('-created_at')
+            count=list(notif)
+            new_notfication=len(count)
+            data={
+                "new_notfication":new_notfication
+            }
+            return Response(data,status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+
 
 class Get_compleata_for_provider(APIView):
     
