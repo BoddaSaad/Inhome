@@ -355,9 +355,18 @@ class Offered_services(APIView):
             })
         if request.user.Provides_services==True:
             try:
+                excluded_orders = Send_offer_from_provider.objects.values_list('order_id', flat=True)
                 provider=Brovides_services.objects.get(user=request.user)
                 refused_orders = Refused_order_from_provider.objects.filter(provider=provider).values_list('order', flat=True)
-                offer=Order_service.objects.filter(status__iexact='P' ,service=provider.service).exclude(id__in=refused_orders).order_by('-created_at')
+                offer = Order_service.objects.filter(
+                        service=provider.service  
+                    ).exclude(
+                        id__in=refused_orders  
+                    ).exclude(
+                        id__in=excluded_orders   
+                    ).exclude(
+                        status__iexact='Complete'  
+                    ).order_by('-created_at')
                 serializer=Order_serviceserlizer(offer,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
@@ -384,6 +393,12 @@ class detal_service(APIView):
         else:
             try:
                 order = Order_service.objects.get(id=order_id)
+                provider=Brovides_services.objects.get(user__id=request.user.id)
+                send_offer_from_provider=Send_offer_from_provider.objects.create(
+                    provider=provider,
+                    order=order                  
+                    
+                )
                 provider = request.user
                 data = request.data
                 data['order'] = order.id
@@ -441,6 +456,7 @@ class beast_offers(APIView):
     def get(self, request):
         try:
             # تصفية العروض بناءً على المستخدم الحالي
+
             offers = ServiceProviderOffer.objects.filter(order__user=request.user.id,status='P').order_by('price')
             serializer = OfferPriceSerializer(offers, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -448,8 +464,7 @@ class beast_offers(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
+   
 
 
 
