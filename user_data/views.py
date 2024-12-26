@@ -969,7 +969,9 @@ class Completa_proceser(APIView):
             try:
                 # الحصول على العرض والتحقق من وجوده
                 offer = ServiceProviderOffer.objects.get(id=offer_id)
+                offers_basket=ServiceProviderOffer.objects.all().exclude(id=offer_id)
                 order = offer.order
+                offers_basket.delete()
                 
                 # التحقق مما إذا كان العرض مكتمل بالفعل
                 if offer.status == "Complete":
@@ -1013,8 +1015,9 @@ class Completa_proceser_client(APIView):
             try:
                 # الحصول على العرض والتحقق من وجوده
                 offer = ServiceProviderOffer.objects.get(id=offer_id)
+                offers_basket=ServiceProviderOffer.objects.all().exclude(id=offer_id)
                 order = offer.order
-                
+                offers_basket.delete()
                 # التحقق مما إذا كان العرض مكتمل بالفعل
                 if offer.status == 'Complete':
                     return Response({"message": "This offer is already complete."})
