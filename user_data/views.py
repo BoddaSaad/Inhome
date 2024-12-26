@@ -685,7 +685,7 @@ class Notifications(APIView):
             notifications.update(seen=True)
             
             # تحويل البيانات باستخدام Serializer المناسب (يجب أن تكون قد قمت بإنشاء Serializer للإشعارات)
-            serializer = Noticationserlizer(notifications, many=True)
+            serializer = Noticationserlizer(notifications, many=True,context={'request': request})
             
             # إرجاع البيانات في استجابة HTTP
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -765,7 +765,7 @@ class Notfi_client(APIView):
         try:
             notif=notfications_client.objects.filter(user=request.user.id).order_by('-created_at')
             notif.update(seen=True)
-            serializer=NotificationSerializer_clent(notif,many=True)
+            serializer=NotificationSerializer_clent(notif,many=True,context={'request': request})
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
