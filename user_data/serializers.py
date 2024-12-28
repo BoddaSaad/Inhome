@@ -296,7 +296,8 @@ class GET_orders(serializers.ModelSerializer):
             "location": order.location,
             "file": order.file.url,
             "count": order.count,
-            "id_order":order.id
+            "id_order":order.id,
+            "phone":order.user.phone
         
         }
         
