@@ -568,7 +568,7 @@ class CancelServiceProviderOfferView(APIView):
                     brovider=offer.provider,
                     title="تم حذف المعاد القادم",
                     content='انقر للذهاب اللي صفحه الطلبات الملغيه ',
-                    title_english="The upcoming appointment has been canceled",
+                    title_english="The next date has been deleted",
                     content_english="Click to go to the canceled orders page",
                 
 
@@ -758,7 +758,7 @@ class CancelOrderView(APIView):
                     title="تم الغاء الطلب من قبل مقد الخدمه",
                     content=f"طلبك لهذه الخدمه '{provider_offer.order.service.name}' تم الغائه",
                     user=provider_offer.order.user,
-                    title_english="Your order has been confirmed by the client",
+                    title_english="The next date has been deleted",
                     content_english=f"Your order for service '{provider_offer.order.service.name_english}' has been canceled by the provider.",
                 
                 )
@@ -1015,7 +1015,7 @@ class Completa_proceser_client(APIView):
             try:
                 # الحصول على العرض والتحقق من وجوده
                 offer = ServiceProviderOffer.objects.get(id=offer_id)
-                offers_basket=ServiceProviderOffer.objects.all().exclude(id=offer_id)
+                offers_basket=ServiceProviderOffer.objects.filter(order=offer.order).exclude(id=offer_id)
                 order = offer.order
                 offers_basket.delete()
                 # التحقق مما إذا كان العرض مكتمل بالفعل
