@@ -363,7 +363,8 @@ class Offered_services(APIView):
                 
                 refused_orders = Refused_order_from_provider.objects.filter(provider=provider).values_list('order', flat=True)
                 offer = Order_service.objects.filter(
-                        service=provider.service  
+                        service=provider.service  ,
+                        user__country=provider.user.country
                     ).exclude(
                         id__in=refused_orders  
                     ).exclude(
