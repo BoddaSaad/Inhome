@@ -824,18 +824,31 @@ class new_notfications(APIView):
 class new_notfications_brovider(APIView):
     permission_classes=[IsAuthenticated]
     def get(self,request):
-        try:
-            notif=Notfications_Broviders.objects.filter(brovider=request.user.id,seen=False).order_by('-created_at')
-            count=list(notif)
-            new_notfication=len(count)
-            data={
-                "new_notfication":new_notfication
-            }
-            return Response(data,status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        if request.user.request_services==True:
+            try:
+                notif=notfications_client.objects.filter(user=request.user.id,seen=False).order_by('-created_at')
+                count=list(notif)
+                new_notfication=len(count)
+                data={
+                    "new_notfication":new_notfication
+                }
+                return Response(data,status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        else:
+            
+            try:
+                notif=Notfications_Broviders.objects.filter(brovider=request.user.id,seen=False).order_by('-created_at')
+                count=list(notif)
+                new_notfication=len(count)
+                data={
+                    "new_notfication":new_notfication
+                }
+                return Response(data,status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
+            
         
-    
 
 
 
