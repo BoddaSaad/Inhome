@@ -593,7 +593,7 @@ class Get_canceled_offer(APIView):
             })
         else:
             try:
-                offer_canceled=ServiceProviderOffer.objects.filter(status='C', order__user=request.user)
+                offer_canceled=ServiceProviderOffer.objects.filter(status='C', order__user=request.user).order_by('-created_at')
                 serializer=OfferPriceSerializer(offer_canceled,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except ServiceProviderOffer.DoesNotExist:
@@ -683,7 +683,7 @@ class times_provider_cancel(APIView):
             return Response ({"error":"user not aloow exist here"},status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
-                times=ServiceProviderOffer.objects.filter(status='C',provider=request.user)
+                times=ServiceProviderOffer.objects.filter(status='C',provider=request.user).order_by('-created_at')
                 serializer=GET_orders(times,many=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
@@ -829,7 +829,7 @@ class Get_compleata_for_provider(APIView):
             return Response({"eroor":"you not aloow"})
         else:
             try:
-                services_offers=ServiceProviderOffer.objects.filter(provider=request.user,status='Complete')
+                services_offers=ServiceProviderOffer.objects.filter(provider=request.user,status='Complete').order_by('-created_at')
                 
                 serializer=CompleatService(services_offers,many=True)
                 
@@ -853,7 +853,7 @@ class Get_compleata_for_client(APIView):
             return Response({"eroor":"you not aloow"})
         else:
             try:
-                services_offers=ServiceProviderOffer.objects.filter(order__user=request.user,status='Complete')
+                services_offers=ServiceProviderOffer.objects.filter(order__user=request.user,status='Complete').order_by('-created_at')
                 
                 serializer=CompleatService(services_offers,many=True)
                 
