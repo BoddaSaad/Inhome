@@ -73,7 +73,7 @@ urlpatterns = [
     #refused order from provider
     path("refused_order_provider/", Rufesd_order_provider.as_view(),name="refused_order_provider")  ,
     path("currency/", User_currency.as_view(), name="User_currency"),
-    path("new_notfications/", new_notfications.as_view(), name="new_notfications"),
+    #path("new_notfications/", new_notfications.as_view(), name="new_notfications"),
     path("new_notfications_brovider/", new_notfications_brovider.as_view(), name="new_notfications_brovider")
     
 ]
