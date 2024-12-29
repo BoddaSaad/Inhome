@@ -682,7 +682,7 @@ class times_provider(APIView):
         else:
             try:
                 times=ServiceProviderOffer.objects.filter(status='A',provider=request.user)
-                serializer=GET_orders(times,many=True)
+                serializer=GET_orders(times,many=True,context={'request': request})
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
@@ -699,7 +699,7 @@ class times_provider_cancel(APIView):
         else:
             try:
                 times=ServiceProviderOffer.objects.filter(status='C',provider=request.user).order_by('-created_at')
-                serializer=GET_orders(times,many=True)
+                serializer=GET_orders(times,many=True,context={'request': request})
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({"eroor":str(e)},status=status.HTTP_400_BAD_REQUEST)
