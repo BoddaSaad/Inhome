@@ -301,12 +301,13 @@ class GET_orders(serializers.ModelSerializer):
         fields = ['id','order', 'status', 'order_details']
 
     def get_order_details(self, obj):
+        request=self.context.get('request')
         order = obj.order
-        user_language = getattr(order.user, 'lan', 'A')
-        if user_language=='A':
-            name_service=order.service.name
+        user_language = getattr(request.user, 'lan', None)
+        if user_language=='E':
+            name_service=order.service.name_english
         else:
-            name_service =order.service.name_english 
+            name_service =order.service.name 
         return {
         
             "service": name_service,
