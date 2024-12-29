@@ -230,7 +230,7 @@ class OfferPriceSerializer(serializers.ModelSerializer):
         
         try:
             brovide_service = Brovides_services.objects.get(user=obj.provider)
-            request=self.request
+            request=self.context.get('request')
             user=request.user
             user=Cuser.objects.get(id=user.id)
             if getattr(user,'lan',None)=='A':
