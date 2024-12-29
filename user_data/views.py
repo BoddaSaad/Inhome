@@ -223,7 +223,22 @@ class Serviceviewset(APIView):
             service_name = request.query_params.get('name', None)
             
             if service_name:
-                service = Services.objects.filter(name__icontains=service_name)
+                if getattr(request.user,'lan',None):
+                    if request.user.lan=='E':
+                        service = Services.objects.filter(name_english__icontains=service_name)
+                        serializer = Serviceserleszer(service, many=True)
+                        return Response(serializer.data,status=status.HTTP_200_OK)
+                    else:
+                        service=Services.objects.filter(name__icontains=service_name)
+                        serializer = Serviceserleszer(service, many=True)
+                        return Response(serializer.data,status=status.HTTP_200_OK)
+                else:
+                    service = Services.objects.filter(name__icontains=service_name)
+                    serializer = Serviceserleszer(service, many=True)
+                    return Response(serializer.data,status=status.HTTP_200_OK)
+                    
+                    
+                
             else:
                 service = Services.objects.all()
             serializer = Serviceserleszer(service, many=True)
