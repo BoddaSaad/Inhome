@@ -219,15 +219,31 @@ class OfferPriceSerializer(serializers.ModelSerializer):
             return None
         
     def get_service_name(self, obj):
+        # try:
+        #     brovide_service = Brovides_services.objects.get(user=obj.provider)
+        #     if getattr(obj.provider,'lan',None)=='A':
+        #         return brovide_service.service.name
+        #     else:
+        #         return brovide_service.service.name_english
+        # except Brovides_services.DoesNotExist:
+        #     return None
+        
         try:
             brovide_service = Brovides_services.objects.get(user=obj.provider)
-            if getattr(obj.provider,'lan',None)=='A':
+            request=self.request
+            user=request.user
+            user=Cuser.objects.get(id=user.id)
+            if getattr(user,'lan',None)=='A':
                 return brovide_service.service.name
             else:
                 return brovide_service.service.name_english
         except Brovides_services.DoesNotExist:
             return None
+        
 
+            
+            
+            
         
     def get_phone(self,obj):
         try:

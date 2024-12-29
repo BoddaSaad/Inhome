@@ -464,7 +464,7 @@ class All_offers(APIView):
         try:
             # تصفية العروض بناءً على المستخدم الحالي
             offers = ServiceProviderOffer.objects.filter(order__user=request.user.id).exclude(status__in=['R', 'Complete'])
-            serializer = OfferPriceSerializer(offers, many=True)
+            serializer = OfferPriceSerializer(offers, many=True,context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -478,7 +478,7 @@ class beast_offers(APIView):
             # تصفية العروض بناءً على المستخدم الحالي
 
             offers = ServiceProviderOffer.objects.filter(order__user=request.user.id,status='P').order_by('price')
-            serializer = OfferPriceSerializer(offers, many=True)
+            serializer = OfferPriceSerializer(offers, many=True,context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -562,7 +562,7 @@ class AcceptedOffersView(APIView):
         else:
             try:
                 accepted_offers = ServiceProviderOffer.objects.filter(status='A', order__user=request.user)
-                serializer = OfferPriceSerializer(accepted_offers, many=True)
+                serializer = OfferPriceSerializer(accepted_offers, many=True,context={'request': request})
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -609,7 +609,7 @@ class Get_canceled_offer(APIView):
         else:
             try:
                 offer_canceled=ServiceProviderOffer.objects.filter(status='C', order__user=request.user).order_by('-created_at')
-                serializer=OfferPriceSerializer(offer_canceled,many=True)
+                serializer=OfferPriceSerializer(offer_canceled,many=True,context={'request': request})
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except ServiceProviderOffer.DoesNotExist:
                 return Response({"error": "Offer not found."}, status=status.HTTP_404_NOT_FOUND)
