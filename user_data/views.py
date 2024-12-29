@@ -372,7 +372,7 @@ class Offered_services(APIView):
                     ).exclude(
                         status__iexact='Complete'  
                     ).order_by('-created_at')
-                serializer=Order_serviceserlizer(offer,many=True)
+                serializer=Order_serviceserlizer(offer,many=True,context={'request': request})
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
