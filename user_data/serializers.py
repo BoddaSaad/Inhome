@@ -132,7 +132,12 @@ class Order_serviceserlizer(serializers.ModelSerializer):
         model=Order_service
         fields='__all__'
     def get_service_name(self, obj):
-        return obj.service.name  # Assuming the service model has a 'name' field
+        request = self.context.get('request')
+        if request and request.user.lan == 'E': 
+            return obj.service.name_english
+        else:
+            return obj.service.name
+        
 
     def get_name(self, obj):
         return obj.user.username  
