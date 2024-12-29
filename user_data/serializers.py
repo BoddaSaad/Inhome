@@ -302,7 +302,10 @@ class GET_orders(serializers.ModelSerializer):
             "file": order.file.url,
             "count": order.count,
             "id_order":order.id,
-            "phone":order.user.phone
+            "phone":order.user.phone,
+            "latitude":order.user.latitude,
+            "longitude":order.user.longitude
+            
         
         }
         
