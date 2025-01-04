@@ -320,7 +320,7 @@ class GET_orders(serializers.ModelSerializer):
             "count": order.count,
             "id_order":order.id,
             "phone":order.user.phone,
-            "latitude":order.user.latitude,
+            "latitude":order.latitude,
             "longitude":order.user.longitude
             
         
