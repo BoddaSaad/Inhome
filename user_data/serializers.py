@@ -323,7 +323,7 @@ class GET_orders(serializers.ModelSerializer):
             "latitude":order.latitude,
             "longitude":order.user.longitude
             
-        
+        ###
         }
         
 
