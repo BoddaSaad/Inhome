@@ -321,7 +321,7 @@ class GET_orders(serializers.ModelSerializer):
             "id_order":order.id,
             "phone":order.user.phone,
             "latitude":order.latitude,
-            "longitude":order.user.longitude
+            "longitude":order.longitude
             
         ###
         }
