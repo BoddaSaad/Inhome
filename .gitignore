@@ -1,4 +1,65 @@
-venv/
-db.sqlite3
 media/
 None/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database
+*.sqlite3
+*.db
+*.sql
+db.sqlite3
+
+# Django stuff
+*.log
+local_settings.py
+settings/local.py
+settings/production.py
+
+# Static files (if collected)
+staticfiles/
+media/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python packaging / distribution
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Testing / Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Debug files
+*.dump
+
