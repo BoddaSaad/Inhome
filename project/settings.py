@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from decouple import config
 from pathlib import Path
 #from dotenv import load_dotenv
 import os
@@ -45,10 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
-    #'social_django',
     'django_crontab',
-    #'admin_material',
-    #'admin_material.admin',
 ]
 
 MIDDLEWARE = [
@@ -171,24 +169,13 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '297166509341-2a60tih8cq8co20bbq83gr4kg5fkd372.apps.googleusercontent.com'
-# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
 
-# SOCIAL_AUTH_FACEBOOK_KEY = 'YOUR_FACEBOOK_APP_ID'
-# SOCIAL_AUTH_FACEBOOK_SECRET = 'YOUR_FACEBOOK_APP_SECRET'
-
-# SOCIAL_AUTH_URL_NAMESPACE = 'social'
-
-# LOGIN_REDIRECT_URL = '/'
-# LOGOUT_REDIRECT_URL = '/'
-
-
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-DEFAULT_FROM_EMAIL = "bentagwy2121@gmail.com"
-EMAIL_PORT = 587
-EMAIL_HOST_USER = "bentagwy2121@gmail.com"
-EMAIL_HOST_PASSWORD = "llux mtlk fvot yekd" 
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST = config('EMAIL_HOST')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+EMAIL_PORT = config('EMAIL_PORT', default=443)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
@@ -208,15 +195,14 @@ SWAGGER_SETTINGS = {
 
 # settings.py
 
-PAYMOB_API_KEY = 'ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2T1RjME16QXhMQ0p1WVcxbElqb2lNVGN5TVRRNU5EYzROaTQwT0RjeU5qWWlmUS5aY1pMNUNVWTdSRld1S3d6eEhwLXlOS3F0RWUxVEhyZmh5TTdyWmplc1pGU3FjZVZWalptZWRudEZSdHh1MEk1M29sQWZIQkd6dVRLT3lvUWpjTEo5dw=='
-PAYMOB_INTEGRATION_ID = '4834160'
-PAYMOB_IFRAME_ID = '868664'
-PAYMOB_AUTH_URL = 'https://accept.paymobsolutions.com/api/auth/tokens'
-#PAYMOB_ORDER_URL='https://accept.paymob.com/api/v1/payment/'
+PAYMOB_API_KEY = config('PAYMOB_API_KEY')
+PAYMOB_INTEGRATION_ID = config('PAYMOB_INTEGRATION_ID')
+PAYMOB_IFRAME_ID = config('PAYMOB_IFRAME_ID')
+PAYMOB_AUTH_URL = config('PAYMOB_AUTH_URL')
 
-PAYMOB_ORDER_URL = 'https://accept.paymobsolutions.com/api/ecommerce/orders'
-PAYMOB_PAYMENT_KEY_URL = 'https://accept.paymobsolutions.com/api/acceptance/payment_keys'
-PAYMOB_IFRAME_URL = 'https://accept.paymobsolutions.com/api/acceptance/iframes/'
+PAYMOB_ORDER_URL = config('PAYMOB_ORDER_URL')
+PAYMOB_PAYMENT_KEY_URL = config('PAYMOB_PAYMENT_KEY_URL')
+PAYMOB_IFRAME_URL = config('PAYMOB_IFRAME_URL')
 
 CRONJOBS = [
     ('0 * * * *', 'user_data.cron.my_cron_job'),

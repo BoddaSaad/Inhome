@@ -1111,6 +1111,7 @@ class Completa_proceser_client(APIView):
         
         
 import requests
+from decouple import config
 from rest_framework_simplejwt.tokens import RefreshToken
 class GoogleLoginView(APIView):
     def get_user_info(self, access_token):
@@ -1123,10 +1124,10 @@ class GoogleLoginView(APIView):
         code = request.data.get('code')    
         
         # Exchange the authorization code for an access token
-        token_url = 'https://oauth2.googleapis.com/token'
-        client_id = '297166509341-2a60tih8cq8co20bbq83gr4kg5fkd372.apps.googleusercontent.com'
-        client_secret = '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'
-        redirect_uri = 'http://localhost:5173/'  # This should match the redirect URI you used for Google OAuth
+        token_url = config('GOOGLE_TOKEN_URL')
+        client_id = config('GOOGLE_CLIENT_ID')
+        client_secret = config('GOOGLE_CLIENT_SECRET')
+        redirect_uri = config('GOOGLE_REDIRECT_URI')  # This should match the redirect URI you used for Google OAuth
         payload = {
             'code': code,
             'client_id': client_id,
