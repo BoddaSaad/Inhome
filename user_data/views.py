@@ -21,6 +21,7 @@ from django.db import IntegrityError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.generics import ListAPIView
 import math
+from .utils import send_to_topic, send_to_device
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     R = 6371  # نصف قطر الأرض بالكيلومتر
@@ -64,8 +65,6 @@ class FilterOrdersByProviderLocationView(APIView):
 
 
 
-
-from .utils import send_to_topic
 
 User = get_user_model()
 class SingViewSet(APIView):
@@ -440,10 +439,20 @@ class detal_service(APIView):
                 data['provider'] = provider.id
                 order.status = 'offer' 
                 order.save()
+
                 
                 serializer = ServiceProviderOfferSerializer(data=data,partial=True)
                 if serializer.is_valid():
                     serializer.save()
+                    
+                    fcm = order.user.fcm_token
+                    try:
+                        title = "Offer for your order"
+                        body = f"Someone made an offer for your order, see the details!"
+                        send_to_device(fcm, title, body)
+                    except Exception as e:
+                        return Response({"error": f"Failed to send notification: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
