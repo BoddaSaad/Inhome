@@ -45,7 +45,7 @@ class SingUpSerializer(serializers.ModelSerializer):
             longitude=validated_data['longitude'],
             request_services=validated_data['request_services'],
             Provides_services=validated_data['Provides_services'],
-            is_active=not validated_data['Provides_services'],
+            # is_active=not validated_data['Provides_services'],
             fcm=fcm,
             password=make_password(validated_data['password']),
         )

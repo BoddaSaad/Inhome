@@ -1,12 +1,12 @@
 import firebase_admin
 from firebase_admin import credentials
+import os
 from django.conf import settings
 
-_firebase_app = None
+# Path to the Firebase credentials file
+cred_path = settings.FIREBASE_CREDENTIALS_PATH
+cred = credentials.Certificate(cred_path)
 
-def get_firebase_app():
-    global _firebase_app
-    if not _firebase_app:
-        cred = credentials.Certificate(settings.FCM_CREDENTIAL_PATH)
-        _firebase_app = firebase_admin.initialize_app(cred)
-    return _firebase_app
+# Initialize Firebase app
+if not firebase_admin._apps:  # Prevent re-initialization
+    firebase_admin.initialize_app(cred)
