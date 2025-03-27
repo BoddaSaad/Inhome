@@ -18,6 +18,7 @@ class Cuser(AbstractUser):
     name = models.CharField(max_length=150)
     latitude = models.CharField(max_length=250)
     longitude=models.CharField(max_length=250)
+    is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # تغيير الحقل المطلوب هنا

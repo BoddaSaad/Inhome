@@ -75,6 +75,11 @@ class SingViewSet(APIView):
         if serializer.is_valid():
             user = serializer.save()
             refresh = RefreshToken.for_user(user)
+            if(user.is_active == False):
+                return Response({
+                    "message": "User created successfully, waiting for admin approval"
+                })
+                
             return Response({"message": "User created successfully", 
                              "user_id": user.id,
                               "refresh": str(refresh),

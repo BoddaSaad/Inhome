@@ -38,8 +38,11 @@ class SingUpSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             phone=validated_data['phone'],
-            Provides_services=validated_data['Provides_services'],
+            latitude=validated_data['latitude'],
+            longitude=validated_data['longitude'],
             request_services=validated_data['request_services'],
+            Provides_services=validated_data['Provides_services'],
+            is_active=not validated_data['Provides_services'],
             password=make_password(validated_data['password']),
         )
         return user
