@@ -12,11 +12,13 @@ from rest_framework.exceptions import ValidationError
 class SingUpSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
     username = serializers.CharField(validators=[])
+    fcm = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+
     
 
     class Meta:
         model = Cuser
-        fields = [ 'username', 'email', 'password', 'password2', 'phone', 'Provides_services', 'request_services' ,'latitude','longitude']
+        fields = [ 'username', 'email', 'password', 'password2', 'phone', 'Provides_services', 'request_services' ,'latitude','longitude', 'fcm']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -34,6 +36,7 @@ class SingUpSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2')
+        fcm = validated_data.get('fcm', None)
         user = Cuser.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -43,6 +46,7 @@ class SingUpSerializer(serializers.ModelSerializer):
             request_services=validated_data['request_services'],
             Provides_services=validated_data['Provides_services'],
             is_active=not validated_data['Provides_services'],
+            fcm=fcm,
             password=make_password(validated_data['password']),
         )
         return user

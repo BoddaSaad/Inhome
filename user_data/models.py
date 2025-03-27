@@ -19,6 +19,7 @@ class Cuser(AbstractUser):
     latitude = models.CharField(max_length=250)
     longitude=models.CharField(max_length=250)
     is_active = models.BooleanField(default=True)
+    fcm = models.CharField(max_length=255, blank=True, null=True, verbose_name="FCM Token")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # تغيير الحقل المطلوب هنا
