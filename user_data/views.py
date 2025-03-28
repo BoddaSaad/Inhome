@@ -447,7 +447,7 @@ class detal_service(APIView):
                     
                     fcm = order.user.fcm
                     try:
-                        title = "Offer for your order"
+                        title = "New offer for your order"
                         body = f"Someone made an offer for your order, see the details!"
                         send_to_device(fcm, title, body)
                     except Exception as e:
@@ -547,6 +547,14 @@ class OfferDecisionView(APIView):
                 
                 
                 )
+
+                fcm = offer.provider.fcm
+                try:
+                    title = "Your order has been confirmed by the client! 🎉🎉"
+                    body = f"Click to go to the upcoming orders page"
+                    send_to_device(fcm, title, body)
+                except Exception as e:
+                    return Response({"error": f"Failed to send notification: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
                 return Response({"message": "Offer accepted."}, status=status.HTTP_200_OK)
             elif decision == 'reject':
