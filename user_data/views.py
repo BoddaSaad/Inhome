@@ -445,7 +445,7 @@ class detal_service(APIView):
                 if serializer.is_valid():
                     serializer.save()
                     
-                    fcm = order.user.fcm_token
+                    fcm = order.user.fcm
                     try:
                         title = "Offer for your order"
                         body = f"Someone made an offer for your order, see the details!"
