@@ -78,7 +78,8 @@ class SingViewSet(APIView):
 
             if(user.is_active == False):
                 return Response({
-                    "message": "User created successfully, waiting for admin approval"
+                    "message": "User created successfully, waiting for admin approval",
+                    "user_id": user.id
                 })
                 
             return Response({"message": "User created successfully", 
