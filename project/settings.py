@@ -209,3 +209,7 @@ CRONJOBS = [
 ]
 
 FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'config', 'firebase_cred.json')
+
+LOGIN_REDIRECT_URL = '/'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
