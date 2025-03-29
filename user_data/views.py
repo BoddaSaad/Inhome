@@ -76,14 +76,6 @@ class SingViewSet(APIView):
             user = serializer.save()
             refresh = RefreshToken.for_user(user)
 
-            try:
-                topic = "admin"
-                title = "New provider registeration!"
-                body = f"New registeration by {user.username}"
-                send_to_topic(topic, title, body)
-            except Exception as e:
-                return Response({"error": f"Failed to send notification: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
             if(user.is_active == False):
                 return Response({
                     "message": "User created successfully, waiting for admin approval"
