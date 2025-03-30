@@ -9,6 +9,9 @@ class CuserAdmin(admin.ModelAdmin):
     inlines = [BrovidesServicesInline]
 
     exclude = ('fcm', 'password', 'name')
+
+    list_display = ('email', 'is_active', 'Provides_services')
+    
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         for field_name, field in form.base_fields.items():
