@@ -38,6 +38,10 @@ class Services(models.Model):
     detal_by_english=models.TextField(null=True)
     def __str__(self) -> str:
         return self.name
+    
+    class Meta:
+        verbose_name = "Service"
+        verbose_name_plural = "Services"
 
 class Brovides_services(models.Model):
     user = models.OneToOneField(Cuser, on_delete=models.CASCADE)
@@ -53,7 +57,9 @@ class Brovides_services(models.Model):
     def __str__(self):
         return self.user.username
     
-    
+    class Meta:
+        verbose_name = "Provided Service"
+        verbose_name_plural = "Provided Services"
     
     
     def clean(self):
