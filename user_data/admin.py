@@ -44,6 +44,7 @@ class Brovides_servicesAdmin(admin.ModelAdmin):
 admin.site.register(Brovides_services, Brovides_servicesAdmin)
 
 admin.site.register(Services)
+admin.site.register(Order_service)
 
 # lista=[
 #     Services,Rating,ClientRating,Order_service,ServiceProviderOffer,Notfications_Broviders,notfications_client,Send_offer_from_provider

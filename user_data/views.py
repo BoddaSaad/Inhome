@@ -22,6 +22,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.generics import ListAPIView
 import math
 from .utils import send_to_topic, send_to_device
+from django.utils import timezone
+from datetime import timedelta
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     R = 6371  # نصف قطر الأرض بالكيلومتر
@@ -384,9 +386,14 @@ class Offered_services(APIView):
                 
                 
                 refused_orders = Refused_order_from_provider.objects.filter(provider=provider).values_list('order', flat=True)
+
+                # Calculate the date 2 days ago
+                two_days_ago = timezone.now() - timedelta(days=2)
+
                 offer = Order_service.objects.filter(
                         service=provider.service  ,
-                        user__country=provider.user.country
+                        user__country=provider.user.country,
+                        created_at__gte=two_days_ago  # Exclude orders older than 2 days
                     ).exclude(
                         id__in=refused_orders  
                     ).exclude(
