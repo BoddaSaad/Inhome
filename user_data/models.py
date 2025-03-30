@@ -2,6 +2,10 @@ from django.contrib.auth.models import AbstractUser , User
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from geopy.geocoders import Nominatim
+from .utils import get_address_from_coordinates
+
+
 class Cuser(AbstractUser):
     select_lan = [
         ("A", "Arabic"),
@@ -122,6 +126,7 @@ class Order_service(models.Model):
     file = models.FileField(upload_to='media/' ,null=True)
     descrtion=models.TextField()
     count = models.PositiveIntegerField(default=1)
+    country = models.CharField(max_length=100, null=True, blank=True)
     status_choices = [
         
         ('P', 'Pending'),
@@ -132,7 +137,13 @@ class Order_service(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     status=models.CharField(max_length=100,choices=status_choices,default='p')
     
-    
+    def save(self, *args, **kwargs):
+        location = get_address_from_coordinates(self.latitude, self.longitude)
+        # Automatically populate the country field based on latitude and longitude
+        self.country = location.raw['address']['country']
+        
+        # Call the parent class's save method
+        super().save(*args, **kwargs)
     
     
     def __str__(self) -> str:

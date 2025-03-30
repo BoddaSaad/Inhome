@@ -392,7 +392,7 @@ class Offered_services(APIView):
 
                 offer = Order_service.objects.filter(
                         service=provider.service  ,
-                        user__country=provider.user.country,
+                        country=provider.user.country,
                         created_at__gte=two_days_ago  # Exclude orders older than 2 days
                     ).exclude(
                         id__in=refused_orders  
