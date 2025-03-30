@@ -1,5 +1,7 @@
 from firebase_admin import messaging
 from core.firebase import firebase_admin
+from geopy.geocoders import Nominatim
+
 
 
 def send_to_topic(topic, title, body, data=None):
@@ -37,3 +39,11 @@ def send_to_device(registration_token, title, body, data=None):
     )
     
     return messaging.send(message)
+
+
+def get_address_from_coordinates(latitude, longitude):
+        geolocator = Nominatim(user_agent="test_app_123456")
+        location = geolocator.reverse((latitude, longitude), language='en')
+        if location:
+            return location
+        return None

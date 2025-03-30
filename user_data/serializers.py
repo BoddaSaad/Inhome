@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Avg
 User = get_user_model()
 from rest_framework.exceptions import ValidationError
+from .utils import get_address_from_coordinates
 
 class SingUpSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
@@ -37,6 +38,8 @@ class SingUpSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password2')
         fcm = validated_data.get('fcm', None)
+        address = get_address_from_coordinates(validated_data['latitude'], validated_data['longitude'])
+
         user = Cuser.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -48,6 +51,8 @@ class SingUpSerializer(serializers.ModelSerializer):
             is_active=not validated_data['Provides_services'],
             fcm=fcm,
             password=make_password(validated_data['password']),
+            country=address.raw['address']['country'],
+            location=address.address
         )
         return user
     

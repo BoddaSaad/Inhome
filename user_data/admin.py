@@ -8,7 +8,7 @@ class BrovidesServicesInline(admin.StackedInline):  # You can also use TabularIn
 class CuserAdmin(admin.ModelAdmin):
     inlines = [BrovidesServicesInline]
 
-    exclude = ('fcm', 'password')
+    exclude = ('fcm', 'password', 'name')
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         for field_name, field in form.base_fields.items():
