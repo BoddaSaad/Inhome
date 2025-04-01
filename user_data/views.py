@@ -1089,7 +1089,7 @@ class Completa_proceser(APIView):
 
 class Completa_proceser_client(APIView):
     def put(self, request, offer_id):
-        if request.user.request_services:
+        if request.user.Provides_services:
             try:
                 # الحصول على العرض والتحقق من وجوده
                 offer = ServiceProviderOffer.objects.get(id=offer_id)
