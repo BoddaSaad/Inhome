@@ -43,7 +43,7 @@ def send_to_device(registration_token, title, body, data=None):
 
 def get_address_from_coordinates(latitude, longitude):
         geolocator = Nominatim(user_agent="test_app_123456")
-        location = geolocator.reverse((latitude, longitude), language='en')
+        location = geolocator.reverse((latitude, longitude), language='ar')
         if location:
             return location
         return None
