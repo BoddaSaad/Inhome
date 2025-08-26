@@ -342,7 +342,10 @@ class Orderservicevieset(APIView):
                 serializer = Order_serviceserlizer(data=data)
 
                 if serializer.is_valid():
-                    serializer.save()
+                    order = serializer.save()
+                    
+                    self.notify_nearby_providers(order)
+
                     return Response({"done": "Order created successfully"}, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -350,6 +353,54 @@ class Orderservicevieset(APIView):
                 return Response({"error": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def notify_nearby_providers(self, order):
+        """
+        Send notifications to nearby service providers when a new order is created
+        """
+        try:
+            # Get all providers who provide this service in the same country
+            providers = Brovides_services.objects.filter(
+                service=order.service,
+                user__country=order.country,
+                user__is_active=True,
+                user__Provides_services=True
+            )
+            
+            order_lat = float(order.latitude)
+            order_lon = float(order.longitude)
+            radius = 15  # 15 km radius
+            
+            for provider in providers:
+                if provider.user.latitude and provider.user.longitude:
+                    provider_lat = float(provider.user.latitude)
+                    provider_lon = float(provider.user.longitude)
+                    
+                    # Calculate distance using haversine formula
+                    distance = haversine_distance(order_lat, order_lon, provider_lat, provider_lon)
+                    
+                    if distance <= radius:
+                        # Create notification for the provider
+                        Notfications_Broviders.objects.create(
+                            title="طلب جديد بالقرب منك",
+                            content=f"يوجد طلب جديد لخدمة {order.service.name} على بعد {distance:.1f} كم منك",
+                            brovider=provider.user,
+                            title_english="New Order Near You",
+                            content_english=f"There's a new order for {order.service.name_english} {distance:.1f} km away from you",
+                            id_offer=0  # No offer ID yet
+                        )
+                        
+                        # Send FCM notification if provider has FCM token
+                        if provider.user.fcm:
+                            try:
+                                title = "New Order Near You! 📍"
+                                body = f"New {order.service.name_english} order {distance:.1f}km away. Tap to send offer!"
+                                send_to_device(provider.user.fcm, title, body)
+                            except Exception as fcm_error:
+                                print(f"FCM notification failed for provider {provider.user.id}: {str(fcm_error)}")
+                                
+        except Exception as e:
+            print(f"Error notifying nearby providers: {str(e)}")
 
 class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated]
