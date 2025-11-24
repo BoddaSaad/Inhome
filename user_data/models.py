@@ -123,7 +123,7 @@ class Order_service(models.Model):
     location = models.CharField(max_length=100,null=True)
     latitude = models.CharField(max_length=250)
     longitude=models.CharField(max_length=250)
-    file = models.FileField(upload_to='media/' ,null=True)
+    file = models.FileField(upload_to='media/' ,null=True, blank=True)
     descrtion=models.TextField()
     count = models.PositiveIntegerField(default=1)
     country = models.CharField(max_length=100, null=True, blank=True)
@@ -148,6 +148,19 @@ class Order_service(models.Model):
     
     def __str__(self) -> str:
         return self.type_service
+
+
+class OrderFile(models.Model):
+    order = models.ForeignKey(Order_service, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(upload_to='media/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"File for order {self.order.id}"
+    
+    class Meta:
+        verbose_name = "Order File"
+        verbose_name_plural = "Order Files"
 
 
 class ServiceProviderOffer(models.Model):

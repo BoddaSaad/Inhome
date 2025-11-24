@@ -338,6 +338,11 @@ class Orderservicevieset(APIView):
                 data = request.data.copy()
                 data['user'] = user.id
                 data['service'] = service.id
+                
+                # Handle multiple file uploads
+                uploaded_files = request.FILES.getlist('files')
+                if uploaded_files:
+                    data['uploaded_files'] = uploaded_files
 
                 serializer = Order_serviceserlizer(data=data)
 
