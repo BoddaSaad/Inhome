@@ -342,6 +342,22 @@ class Orderservicevieset(APIView):
                 # Handle multiple file uploads
                 uploaded_files = request.FILES.getlist('files')
                 if uploaded_files:
+                    # Validate file types (images and videos only)
+                    allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 
+                                   'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo']
+                    max_size = 50 * 1024 * 1024  # 50MB max per file
+                    
+                    for file in uploaded_files:
+                        if file.content_type not in allowed_types:
+                            return Response({
+                                "error": f"Invalid file type: {file.name}. Only images and videos are allowed."
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                        
+                        if file.size > max_size:
+                            return Response({
+                                "error": f"File too large: {file.name}. Maximum size is 50MB."
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                    
                     data['uploaded_files'] = uploaded_files
 
                 serializer = Order_serviceserlizer(data=data)

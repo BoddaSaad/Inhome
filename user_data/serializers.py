@@ -468,12 +468,12 @@ class CompleatService(serializers.ModelSerializer):
         return obj.provider.id
     
     def get_image(self,obj):
-        # Return the first file from the files list, or the old file field
+        # Return list of file URLs for consistency
         if obj.order.files.exists():
             return [file.file.url for file in obj.order.files.all()]
         elif obj.order.file:
-            return obj.order.file.url
-        return None
+            return [obj.order.file.url]
+        return []
     
     def get_provider(self,obj):
         return obj.provider.username
