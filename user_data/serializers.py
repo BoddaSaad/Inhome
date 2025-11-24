@@ -155,6 +155,47 @@ class Order_serviceserlizer(serializers.ModelSerializer):
         return obj.user.username  
 
 
+class OrderFileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for OrderFile model to handle multiple file uploads
+    """
+    class Meta:
+        model = OrderFile
+        fields = ['id', 'file', 'file_type', 'uploaded_at', 'description']
+        read_only_fields = ['id', 'file_type', 'uploaded_at']
+
+
+class OrderFileCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating OrderFile instances
+    """
+    class Meta:
+        model = OrderFile
+        fields = ['file', 'description']
+
+
+class Order_serviceserlizer_with_files(serializers.ModelSerializer):
+    """
+    Extended Order service serializer that includes files
+    """
+    service_name = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    files = OrderFileSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Order_service
+        fields = '__all__'
+    
+    def get_service_name(self, obj):
+        request = self.context.get('request')
+        if request and request.user.lan == 'E': 
+            return obj.service.name_english
+        else:
+            return obj.service.name
+        
+    def get_name(self, obj):
+        return obj.user.username
+
 
 class CombinedCuserSerializer(serializers.ModelSerializer):
    
@@ -320,22 +361,31 @@ class GET_orders(serializers.ModelSerializer):
             name_service=order.service.name_english
         else:
             name_service =order.service.name 
-        return {
+        # Get all files for this order
+        files = order.files.all()
+        files_data = []
+        if files:
+            files_data = [{
+                'id': f.id,
+                'url': f.file.url,
+                'type': f.file_type,
+                'description': f.description,
+                'uploaded_at': f.uploaded_at
+            } for f in files]
         
+        return {
             "service": name_service,
             "user": order.user.username,
             "id_user":order.user.id,
             "type_service": order.type_service,
             "time": order.time,
             "location": order.location,
-            "file": order.file.url,
+            "files": files_data,  # Changed from single file to files list
             "count": order.count,
             "id_order":order.id,
             "phone":order.user.phone,
             "latitude":order.latitude,
             "longitude":order.longitude
-            
-        ###
         }
         
 
@@ -416,6 +466,7 @@ class CompleatService(serializers.ModelSerializer):
     created_at = serializers.SerializerMethodField()
     provider=serializers.SerializerMethodField()
     image=serializers.SerializerMethodField()
+    files=serializers.SerializerMethodField()  # Add files field
     id_provider=serializers.SerializerMethodField()
     user=serializers.SerializerMethodField()
     rating_cilent=serializers.SerializerMethodField()
@@ -434,7 +485,24 @@ class CompleatService(serializers.ModelSerializer):
         return obj.provider.id
     
     def get_image(self,obj):
-        return obj.order.file.url
+        # Return the first image file or None
+        files = obj.order.files.filter(file_type='image').first()
+        if files:
+            return files.file.url
+        # If no image, return first file of any type
+        first_file = obj.order.files.first()
+        return first_file.file.url if first_file else None
+    
+    def get_files(self,obj):
+        # Return all files for this order
+        files = obj.order.files.all()
+        return [{
+            'id': f.id,
+            'url': f.file.url,
+            'type': f.file_type,
+            'description': f.description,
+            'uploaded_at': f.uploaded_at
+        } for f in files]
     
     def get_provider(self,obj):
         return obj.provider.username

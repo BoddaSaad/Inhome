@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cuser, Services, Brovides_services, Rating, ClientRating, Order_service, ServiceProviderOffer, Notfications_Broviders, notfications_client ,Send_offer_from_provider
+from .models import Cuser, Services, Brovides_services, Rating, ClientRating, Order_service, OrderFile, ServiceProviderOffer, Notfications_Broviders, notfications_client ,Send_offer_from_provider
 from .utils import send_to_device
 
 class BrovidesServicesInline(admin.StackedInline):  # You can also use TabularInline
@@ -44,7 +44,22 @@ class Brovides_servicesAdmin(admin.ModelAdmin):
 admin.site.register(Brovides_services, Brovides_servicesAdmin)
 
 admin.site.register(Services)
-admin.site.register(Order_service)
+
+class OrderFileInline(admin.TabularInline):
+    model = OrderFile
+    extra = 1
+    fields = ('file', 'file_type', 'description')
+    readonly_fields = ('file_type', 'uploaded_at')
+
+class OrderServiceAdmin(admin.ModelAdmin):
+    inlines = [OrderFileInline]
+    list_display = ('id', 'service', 'user', 'status', 'created_at')
+    list_filter = ('status', 'service', 'created_at')
+    search_fields = ('user__username', 'user__email', 'service__name')
+    readonly_fields = ('created_at',)
+
+admin.site.register(Order_service, OrderServiceAdmin)
+admin.site.register(OrderFile)
 
 # lista=[
 #     Services,Rating,ClientRating,Order_service,ServiceProviderOffer,Notfications_Broviders,notfications_client,Send_offer_from_provider

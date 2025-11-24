@@ -344,9 +344,19 @@ class Orderservicevieset(APIView):
                 if serializer.is_valid():
                     order = serializer.save()
                     
+                    # Handle multiple file uploads
+                    files = request.FILES.getlist('files')  # Get list of files
+                    if files:
+                        for file in files:
+                            OrderFile.objects.create(
+                                order=order,
+                                file=file,
+                                description=request.data.get('file_description', '')
+                            )
+                    
                     self.notify_nearby_providers(order)
 
-                    return Response({"done": "Order created successfully"}, status=status.HTTP_201_CREATED)
+                    return Response({"done": "Order created successfully", "order_id": order.id}, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             except Services.DoesNotExist:
@@ -421,6 +431,97 @@ class UpdateUserView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class OrderFileUploadView(APIView):
+    """
+    View to handle adding files to existing orders
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, order_id):
+        try:
+            # Check if order exists and belongs to the user
+            order = Order_service.objects.get(id=order_id, user=request.user)
+            
+            files = request.FILES.getlist('files')
+            if not files:
+                return Response({"error": "No files provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            created_files = []
+            for file in files:
+                file_description = request.data.get('description', '')
+                order_file = OrderFile.objects.create(
+                    order=order,
+                    file=file,
+                    description=file_description
+                )
+                created_files.append(OrderFileSerializer(order_file).data)
+            
+            return Response({
+                "message": f"{len(created_files)} files uploaded successfully",
+                "files": created_files
+            }, status=status.HTTP_201_CREATED)
+            
+        except Order_service.DoesNotExist:
+            return Response({"error": "Order not found or you don't have permission"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, order_id, file_id):
+        """
+        Delete a specific file from an order
+        """
+        try:
+            order = Order_service.objects.get(id=order_id, user=request.user)
+            order_file = OrderFile.objects.get(id=file_id, order=order)
+            
+            # Delete the actual file from storage
+            if order_file.file:
+                order_file.file.delete()
+            
+            order_file.delete()
+            
+            return Response({"message": "File deleted successfully"}, status=status.HTTP_200_OK)
+            
+        except Order_service.DoesNotExist:
+            return Response({"error": "Order not found or you don't have permission"}, status=status.HTTP_404_NOT_FOUND)
+        except OrderFile.DoesNotExist:
+            return Response({"error": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OrderDetailWithFilesView(APIView):
+    """
+    View to get order details with all associated files
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, order_id):
+        try:
+            order = Order_service.objects.get(id=order_id)
+            
+            # Check if user has permission to view this order
+            if request.user.Provides_services:
+                # Provider can see orders in their service area
+                provider = Brovides_services.objects.get(user=request.user)
+                if order.service != provider.service or order.country != request.user.country:
+                    return Response({"error": "You don't have permission to view this order"}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                # Client can only see their own orders
+                if order.user != request.user:
+                    return Response({"error": "You don't have permission to view this order"}, status=status.HTTP_403_FORBIDDEN)
+            
+            serializer = Order_serviceserlizer_with_files(order, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Order_service.DoesNotExist:
+            return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Brovides_services.DoesNotExist:
+            return Response({"error": "Provider profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class Offered_services(APIView):
     permission_classes=[IsAuthenticated]
     def get (slef,request):
@@ -452,7 +553,7 @@ class Offered_services(APIView):
                     ).exclude(
                         status__iexact='Complete'  
                     ).order_by('-created_at')
-                serializer=Order_serviceserlizer(offer,many=True,context={'request': request})
+                serializer=Order_serviceserlizer_with_files(offer,many=True,context={'request': request})
                 return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
@@ -466,7 +567,7 @@ class detal_service(APIView):
     def get(self ,request,id):
         try:
             service=Order_service.objects.get(id=id)
-            serializer=Order_serviceserlizer(service)
+            serializer=Order_serviceserlizer_with_files(service,context={'request': request})
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)

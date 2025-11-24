@@ -123,7 +123,6 @@ class Order_service(models.Model):
     location = models.CharField(max_length=100,null=True)
     latitude = models.CharField(max_length=250)
     longitude=models.CharField(max_length=250)
-    file = models.FileField(upload_to='media/' ,null=True)
     descrtion=models.TextField()
     count = models.PositiveIntegerField(default=1)
     country = models.CharField(max_length=100, null=True, blank=True)
@@ -148,6 +147,43 @@ class Order_service(models.Model):
     
     def __str__(self) -> str:
         return self.type_service
+
+
+class OrderFile(models.Model):
+    """
+    Model to handle multiple file uploads for each order
+    """
+    FILE_TYPE_CHOICES = [
+        ('image', 'Image'),
+        ('video', 'Video'),
+        ('document', 'Document'),
+    ]
+    
+    order = models.ForeignKey(Order_service, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(upload_to='order_files/%Y/%m/%d/')
+    file_type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES, default='image')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    
+    class Meta:
+        verbose_name = "Order File"
+        verbose_name_plural = "Order Files"
+        ordering = ['-uploaded_at']
+    
+    def __str__(self):
+        return f"File for Order #{self.order.id} - {self.file.name}"
+    
+    def save(self, *args, **kwargs):
+        # Auto-detect file type based on file extension
+        if self.file:
+            file_extension = self.file.name.lower().split('.')[-1]
+            if file_extension in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']:
+                self.file_type = 'image'
+            elif file_extension in ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv']:
+                self.file_type = 'video'
+            else:
+                self.file_type = 'document'
+        super().save(*args, **kwargs)
 
 
 class ServiceProviderOffer(models.Model):
