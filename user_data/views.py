@@ -4,7 +4,6 @@ from rest_framework import status
 from django.contrib.auth.hashers import make_password
 from .serializers import SingUpSerializer
 from .models import *
-from .models import OrderFile  # Explicit import to ensure OrderFile is available
 from .serializers import *
 import random
 import time
