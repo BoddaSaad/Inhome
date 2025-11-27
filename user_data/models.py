@@ -5,6 +5,14 @@ from django.utils import timezone
 from geopy.geocoders import Nominatim
 from .utils import get_address_from_coordinates
 
+# Explicitly export all models for proper import
+__all__ = [
+    'Cuser', 'Services', 'Brovides_services', 'Rating', 'ClientRating', 
+    'Order_service', 'OrderFile', 'ServiceProviderOffer', 
+    'Notfications_Broviders', 'notfications_client', 
+    'Refused_order_from_provider', 'Send_offer_from_provider'
+]
+
 
 class Cuser(AbstractUser):
     select_lan = [

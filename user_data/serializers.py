@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import validate_email as django_validate_email
 from .models import *
+from .models import OrderFile  # Explicit import to ensure OrderFile is available
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model

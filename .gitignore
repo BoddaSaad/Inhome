@@ -1,6 +1,7 @@
+# Django project specific
 media/
-None/
 config/
+None/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -28,8 +29,12 @@ local_settings.py
 settings/local.py
 settings/production.py
 
-# Static files (if collected)
+# Collected static files (production)
 staticfiles/
+static_collected/
+static_root/
+
+# Media files (user uploads)
 media/
 
 # IDE & Editor files
