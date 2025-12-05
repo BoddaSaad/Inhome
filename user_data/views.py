@@ -604,7 +604,6 @@ class detal_service(APIView):
                         send_to_device(fcm, title, body)
                     except Exception as e:
                         pass  # Continue execution regardless of notification failure
-                    return Response({"error": f"Failed to send notification: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                     
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
