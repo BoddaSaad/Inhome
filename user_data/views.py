@@ -598,12 +598,13 @@ class detal_service(APIView):
                     serializer.save()
                     
                     fcm = order.user.fcm
+                    title = "New offer for your order"
+                    body = f"Someone made an offer for your order, see the details!"
                     try:
-                        title = "New offer for your order"
-                        body = f"Someone made an offer for your order, see the details!"
                         send_to_device(fcm, title, body)
                     except Exception as e:
-                        return Response({"error": f"Failed to send notification: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        pass  # Continue execution regardless of notification failure
+                    return Response({"error": f"Failed to send notification: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                     
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
